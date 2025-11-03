@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Post - Admin Dashboard</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- CKEditor CSS -->
+    <link rel="stylesheet" href="{% static 'ckeditor/ckeditor/contents.css' %}">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .form-control, .form-select { border: 1px solid #ced4da; }
+        .form-control:focus, .form-select:focus { border-color: #0d6efd; box-shadow: 0 0 0 0.2rem rgba(13,110,253,.25); }
+        .current-file { background-color: #e9ecef; padding: 10px; border-radius: 5px; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="{% url 'admin_dashboard' %}">
+                <i class="fas fa-edit me-2"></i>Edit Post
+            </a>
+            <div>
+                <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-outline-light btn-sm me-2">
+                    <i class="fas fa-eye me-1"></i>View Post
+                </a>
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-light btn-sm">
+                    <i class="fas fa-arrow-left me-1"></i>Back to Dashboard
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container my-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <h3 class="mb-4">Edit Post</h3>
+                        
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            
+                            <!-- Title -->
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Title <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control form-control-lg" id="title" name="title" value="{{ post.title }}" required>
+                            </div>
+
+                            <!-- Category -->
+                            <div class="mb-3">
+                                <label for="category" class="form-label">Category <span class="text-danger">*</span></label>
+                                <select class="form-select" id="category" name="category" required>
+                                    <option value="">Select a category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category.id }}" {% if category.id == post.category.id %}selected{% endif %}>{{ category.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+
+
+                            <!-- Content -->
+                            <div class="mb-3">
+                                <label for="content" class="form-label">Content <span class="text-danger">*</span></label>
+                                <textarea class="form-control" id="content" name="content" rows="15" required>{{ post.content }}</textarea>
+                                <small class="text-muted">You can add images and videos in your content.</small>
+                            </div>
+
+                            <!-- Title Image -->
+                            <div class="mb-3">
+                                <label for="featured_image" class="form-label">Title Image (Cover/Banner)</label>
+                                {% if post.featured_image %}
+                                <div class="current-file">
+                                    <i class="fas fa-image me-2"></i>Current: {{ post.featured_image.name }}
+                                </div>
+                                {% endif %}
+                                <input type="file" class="form-control mt-2" id="featured_image" name="featured_image" accept="image/*">
+                                <small class="text-muted">Upload a new title/cover image to replace the current one.</small>
+                            </div>
+
+
+                            <!-- Status -->
+                            <div class="mb-4">
+                                <label for="status" class="form-label">Status <span class="text-danger">*</span></label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="draft" {% if post.status == 'draft' %}selected{% endif %}>Draft</option>
+                                    <option value="published" {% if post.status == 'published' %}selected{% endif %}>Published</option>
+                                </select>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="d-flex gap-2">
+                                <button type="submit" name="action" value="save" class="btn btn-secondary">
+                                    <i class="fas fa-save me-1"></i>Save Draft
+                                </button>
+                                <button type="submit" name="action" value="publish" class="btn btn-success">
+                                    <i class="fas fa-upload me-1"></i>Publish
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Update
+                                </button>
+                                {% if post.slug %}
+                                <a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-outline-info">
+                                    <i class="fas fa-eye me-1"></i>Preview
+                                </a>
+                                <a href="{% url 'admin_delete_post' post.slug %}" class="btn btn-outline-danger">
+                                    <i class="fas fa-trash me-1"></i>Delete
+                                </a>
+                                {% else %}
+                                <a href="/admin/blog/post/{{ post.id }}/change/" class="btn btn-outline-info">Preview</a>
+                                {% endif %}
+                                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Post Info -->
+                <div class="card shadow mt-4">
+                    <div class="card-body">
+                        <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Post Information</h5>
+                        <p class="mb-1"><strong>Created:</strong> {{ post.created_at|date:"F d, Y" }}</p>
+                        <p class="mb-1"><strong>Last Updated:</strong> {{ post.updated_at|date:"F d, Y" }}</p>
+                        <p class="mb-0"><strong>Author:</strong> {{ post.author.get_full_name|default:post.author.username }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- CKEditor - Latest Secure Version with Image Upload -->
+    <script src="https://cdn.ckeditor.com/4.25.1-lts/standard-all/ckeditor.js"></script>
+    <script>
+        CKEDITOR.replace('content', {
+            height: 600,
+            width: '100%',
+            // Add plugins: autogrow, table tools, upload + advanced image plugins for captions, drag&drop and resizing
+            extraPlugins: 'autogrow,uploadimage,image2,uploadwidget,filetools,colorbutton,justify,font,pastefromword,tableresize,tabletools',
+            removePlugins: 'easyimage,cloudservices',
+            filebrowserBrowseUrl: '/ckeditor/browse/?type=Images',
+            filebrowserUploadUrl: '/ckeditor/upload/?type=Images',
+            // Use XHR method so we can attach CSRF header
+            filebrowserUploadMethod: 'xhr',
+            // Fixed size for content box
+            resize_enabled: false,
+            autoGrow_minHeight: 300,
+            autoGrow_maxHeight: 1200,
+            autoGrow_bottomSpace: 50,
+            removeButtons: 'Save,NewPage,Preview,Print,Source',
+            // Clean Word/Google Docs-like toolbar - simplified single row
+            toolbar: [
+                { name: 'clipboard', items: ['Undo','Redo'] },
+                { name: 'styles', items: ['Format','Font','FontSize'] },
+                { name: 'basicstyles', items: ['Bold','Italic','Underline','Strike','-','TextColor','BGColor'] },
+                { name: 'paragraph', items: ['NumberedList','BulletedList','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock'] },
+                { name: 'links', items: ['Link','Unlink'] },
+                { name: 'insert', items: ['Image','Table'] },
+                { name: 'tools', items: ['Maximize'] }
+            ],
+            contentsCss: [
+                'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
+                '{% static "css/style.css" %}'
+            ],
+            stylesSet: [
+                { name: 'Normal', element: 'p' },
+                { name: 'Heading 1', element: 'h1' },
+                { name: 'Heading 2', element: 'h2' },
+                { name: 'Heading 3', element: 'h3' },
+                { name: 'Quote', element: 'blockquote' }
+            ],
+            image2_alignClasses: ['align-left', 'align-center', 'align-right'],
+            image2_disableResizer: false,
+            allowedContent: true,
+            // Allow captions & better image handling
+            image2_captionedClass: 'image-captioned',
+            removeDialogTabs: 'image:advanced;image:Link',
+            // Table configuration for easy creation and editing
+            table_defaultCellPadding: 5,
+            table_defaultCellSpacing: 0
+        });
+
+        // Attach CSRF token to CKEditor XHR uploads
+        function getCookie(name) {
+            var cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                var cookies = document.cookie.split(';');
+                for (var i = 0; i < cookies.length; i++) {
+                    var cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        var csrftoken = getCookie('csrftoken');
+        CKEDITOR.on('instanceReady', function(ev) {
+            ev.editor.on('fileUploadRequest', function(evt) {
+                var xhr = evt.data.fileLoader.xhr;
+                if (xhr && csrftoken) {
+                    xhr.setRequestHeader('X-CSRFToken', csrftoken);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

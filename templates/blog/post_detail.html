@@ -1,0 +1,180 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}{{ post.title }} - Blog Site{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Main Content -->
+    <div class="col-lg-8">
+        <!-- Post Header -->
+        <div class="mb-4">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'post_list' %}" class="text-dark">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'category_posts' post.category.slug %}" class="text-dark">{{ post.category.name }}</a></li>
+                    <li class="breadcrumb-item active">{{ post.title }}</li>
+                </ol>
+            </nav>
+            
+            <h1 class="display-4 fw-bold text-dark mb-3">{{ post.title }}</h1>
+            
+            <div class="d-flex align-items-center mb-3">
+                <span class="badge bg-dark text-light me-3">{{ post.category.name }}</span>
+                <small class="text-muted me-3">
+                    <i class="fas fa-user me-1"></i>{{ post.author.get_full_name|default:post.author.username }}
+                </small>
+                <small class="text-muted">
+                    <i class="fas fa-calendar me-1"></i>{{ post.created_at|date:"F d, Y" }}
+                </small>
+            </div>
+            
+            <hr class="border-dark">
+        </div>
+
+        <!-- Featured Image -->
+        {% if post.featured_image %}
+        <div class="mb-4">
+            <img src="{{ post.featured_image.url }}" class="img-fluid rounded shadow" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+
+        <!-- YouTube Video -->
+        {% if post.youtube_url %}
+        <div class="mb-4">
+            <div class="ratio ratio-16x9">
+                <iframe src="{{ post.get_youtube_embed_url }}" title="{{ post.title }}" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Uploaded Video -->
+        {% if post.video_file %}
+        <div class="mb-4">
+            <div class="ratio ratio-16x9">
+                <video controls class="w-100" style="border-radius: 8px;">
+                    <source src="{{ post.video_file.url }}" type="video/mp4">
+                    <source src="{{ post.video_file.url }}" type="video/webm">
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Post Content -->
+        <div class="post-content">
+            {{ post.content|safe }}
+        </div>
+
+        <!-- Post Images -->
+        {% if post.images.all %}
+        <div class="mt-5">
+            <h4 class="mb-3">Images</h4>
+            <div class="row">
+                {% for image in post.images.all %}
+                <div class="col-md-6 mb-3">
+                    <div class="card border-0 shadow-sm">
+                        <img src="{{ image.image.url }}" class="card-img-top" alt="{{ image.caption|default:'Post image' }}">
+                        {% if image.caption %}
+                        <div class="card-body">
+                            <p class="card-text text-muted small">{{ image.caption }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Navigation -->
+        <div class="mt-5 pt-4 border-top">
+            <div class="row">
+                <div class="col-md-6">
+                    <a href="{% url 'post_list' %}" class="btn btn-outline-dark">
+                        <i class="fas fa-arrow-left me-2"></i>Back to Posts
+                    </a>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <a href="{% url 'category_posts' post.category.slug %}" class="btn btn-outline-dark">
+                        More in {{ post.category.name }} <i class="fas fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <div class="sticky-top" style="top: 2rem;">
+            <!-- Post Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-dark text-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Post Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <strong>Author:</strong><br>
+                        <span class="text-muted">{{ post.author.get_full_name|default:post.author.username }}</span>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Category:</strong><br>
+                        <a href="{% url 'category_posts' post.category.slug %}" class="text-dark text-decoration-none">
+                            {{ post.category.name }}
+                        </a>
+                    </div>
+                    <div class="mb-3">
+                        <strong>Published:</strong><br>
+                        <span class="text-muted">{{ post.created_at|date:"F d, Y" }}</span>
+                    </div>
+                    {% if post.updated_at != post.created_at %}
+                    <div>
+                        <strong>Last Updated:</strong><br>
+                        <span class="text-muted">{{ post.updated_at|date:"F d, Y" }}</span>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Related Posts -->
+            {% if related_posts %}
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-header bg-dark text-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-newspaper me-2"></i>Related Posts
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for related_post in related_posts %}
+                    <div class="mb-3">
+                        <a href="{% url 'post_detail' related_post.slug %}" class="text-dark text-decoration-none">
+                            <h6 class="mb-1">{{ related_post.title }}</h6>
+                        </a>
+                        <small class="text-muted">{{ related_post.created_at|date:"M d, Y" }}</small>
+                    </div>
+                    {% if not forloop.last %}<hr class="my-2">{% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Categories -->
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-dark text-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tags me-2"></i>All Categories
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% for category in categories %}
+                    <a href="{% url 'category_posts' category.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-bg">
+                        <i class="fas fa-folder me-2"></i>{{ category.name }}
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
