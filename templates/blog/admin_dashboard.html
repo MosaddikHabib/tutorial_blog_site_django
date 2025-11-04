@@ -197,5 +197,46 @@
 
 	<!-- Bootstrap JS -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+	
+	<script>
+		// Load auto-saved drafts
+		function loadDrafts() {
+			fetch('{% url "get_draft_posts" %}')
+				.then(response => response.json())
+				.then(data => {
+					if (data.success && data.drafts.length > 0) {
+						const draftsCard = document.getElementById('draftsCard');
+						const draftsList = document.getElementById('draftsList');
+						
+						let draftsHtml = '<div class="row">';
+						data.drafts.forEach(draft => {
+							draftsHtml += `
+								<div class="col-md-6 mb-3">
+									<div class="card border-warning">
+										<div class="card-body">
+											<h6 class="card-title">${draft.title}</h6>
+											<p class="card-text">
+												<small class="text-muted">Last saved: ${draft.updated_at}</small>
+											</p>
+											<a href="${draft.edit_url}" class="btn btn-sm btn-warning">
+												<i class="fas fa-edit me-1"></i>Continue Editing
+											</a>
+										</div>
+									</div>
+								</div>
+							`;
+						});
+						draftsHtml += '</div>';
+						
+						draftsList.innerHTML = draftsHtml;
+						draftsCard.style.display = 'block';
+					}
+				})
+				.catch(error => console.error('Error loading drafts:', error));
+		}
+
+		// Load drafts when page loads
+		document.addEventListener('DOMContentLoaded', loadDrafts);
+	</script>
 </body>
 </html>

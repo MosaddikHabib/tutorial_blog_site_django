@@ -3,6 +3,10 @@ from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.utils.text import slugify
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_POST
+import json
 from .models import Post, Category
 
 
@@ -193,3 +197,110 @@ def admin_delete_post(request, slug):
         'post': post,
     }
     return render(request, 'blog/admin_delete_post.html', context)
+
+
+@login_required(login_url='custom_login')
+@require_POST
+def auto_save_draft(request):
+    """Auto-save draft functionality"""
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'})
+    
+    try:
+        data = json.loads(request.body)
+        title = data.get('title', '').strip()
+        content = data.get('content', '').strip()
+        category_id = data.get('category', '')
+        post_id = data.get('post_id', None)
+        
+        # Don't save if both title and content are empty
+        if not title and not content:
+            return JsonResponse({'success': True, 'message': 'Nothing to save'})
+        
+        # Use a default title if empty
+        if not title:
+            title = 'Untitled Draft'
+        
+        if post_id:
+            # Update existing draft
+            try:
+                post = Post.objects.get(id=post_id, author=request.user, status='draft')
+                post.title = title
+                post.content = content
+                if category_id:
+                    try:
+                        category = Category.objects.get(id=category_id)
+                        post.category = category
+                    except Category.DoesNotExist:
+                        pass
+                post.save()
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Draft updated',
+                    'post_id': post.id
+                })
+            except Post.DoesNotExist:
+                pass
+        
+        # Create new draft
+        slug = slugify(title)
+        counter = 1
+        original_slug = slug
+        while Post.objects.filter(slug=slug).exists():
+            slug = f"{original_slug}-{counter}"
+            counter += 1
+        
+        category = None
+        if category_id:
+            try:
+                category = Category.objects.get(id=category_id)
+            except Category.DoesNotExist:
+                category = Category.objects.first()  # Default to first category
+        else:
+            category = Category.objects.first()
+        
+        if not category:
+            return JsonResponse({'success': False, 'error': 'No categories available'})
+        
+        post = Post.objects.create(
+            title=title,
+            slug=slug,
+            author=request.user,
+            category=category,
+            content=content,
+            excerpt='',
+            status='draft',
+            youtube_url='',
+        )
+        
+        return JsonResponse({
+            'success': True, 
+            'message': 'Draft saved automatically',
+            'post_id': post.id
+        })
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
+
+
+@login_required(login_url='custom_login')
+def get_draft_posts(request):
+    """Get user's draft posts"""
+    if not request.user.is_staff:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'})
+    
+    drafts = Post.objects.filter(
+        author=request.user, 
+        status='draft'
+    ).order_by('-updated_at')[:5]
+    
+    draft_list = []
+    for draft in drafts:
+        draft_list.append({
+            'id': draft.id,
+            'title': draft.title,
+            'updated_at': draft.updated_at.strftime('%Y-%m-%d %H:%M'),
+            'edit_url': f'/manage/edit-post/{draft.slug}/' if draft.slug else '#'
+        })
+    
+    return JsonResponse({'success': True, 'drafts': draft_list})

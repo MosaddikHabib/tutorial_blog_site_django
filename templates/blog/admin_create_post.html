@@ -183,6 +183,9 @@
                                     <i class="fas fa-upload me-2"></i>Publish Post
                                 </button>
                                 <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+                                <div class="mt-2">
+                                    <small id="autoSaveStatus" class="text-muted">Auto-save: Ready</small>
+                                </div>
                             </div>
                         </form>
                     </div>
@@ -228,9 +231,95 @@
             }
         });
 
+        // Auto-save functionality
+        let autoSaveTimeout;
+        let currentDraftId = null;
+        const autoSaveStatus = document.getElementById('autoSaveStatus');
+
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function autoSaveDraft() {
+            const title = document.getElementById('title').value.trim();
+            const content = quill.root.innerHTML.trim();
+            const category = document.getElementById('category').value;
+
+            if (!title && !content) return;
+
+            autoSaveStatus.textContent = 'Auto-save: Saving...';
+            autoSaveStatus.className = 'text-warning';
+
+            fetch('{% url "auto_save_draft" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({
+                    title: title,
+                    content: content,
+                    category: category,
+                    post_id: currentDraftId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.post_id) {
+                        currentDraftId = data.post_id;
+                    }
+                    autoSaveStatus.textContent = 'Auto-save: Saved ✓';
+                    autoSaveStatus.className = 'text-success';
+                    setTimeout(() => {
+                        autoSaveStatus.textContent = 'Auto-save: Ready';
+                        autoSaveStatus.className = 'text-muted';
+                    }, 3000);
+                } else {
+                    autoSaveStatus.textContent = 'Auto-save: Error';
+                    autoSaveStatus.className = 'text-danger';
+                }
+            })
+            .catch(error => {
+                console.error('Auto-save error:', error);
+                autoSaveStatus.textContent = 'Auto-save: Error';
+                autoSaveStatus.className = 'text-danger';
+            });
+        }
+
+        function scheduleAutoSave() {
+            clearTimeout(autoSaveTimeout);
+            autoSaveTimeout = setTimeout(autoSaveDraft, 3000); // Auto-save after 3 seconds of inactivity
+        }
+
+        // Add event listeners for auto-save
+        document.getElementById('title').addEventListener('input', scheduleAutoSave);
+        document.getElementById('category').addEventListener('change', scheduleAutoSave);
+        quill.on('text-change', scheduleAutoSave);
+
         // Before form submission, copy Quill content to hidden textarea
         document.getElementById('postForm').addEventListener('submit', function() {
             document.getElementById('content').value = quill.root.innerHTML;
+        });
+
+        // Auto-save when user leaves the page
+        window.addEventListener('beforeunload', function(e) {
+            const title = document.getElementById('title').value.trim();
+            const content = quill.root.innerHTML.trim();
+            if (title || content) {
+                autoSaveDraft();
+            }
         });
     </script>
 </body>
