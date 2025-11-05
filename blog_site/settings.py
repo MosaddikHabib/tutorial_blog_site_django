@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # 'ckeditor',
     # 'ckeditor_uploader',
+    
     'blog',  # Our blog app
 ]
 
@@ -134,6 +135,8 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '*']
 
 # CKEditor Configuration
 CKEDITOR_UPLOAD_PATH = 'ckeditor_uploads/'
