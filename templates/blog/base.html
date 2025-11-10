@@ -74,31 +74,40 @@
     </style>
 </head>
 <body>
-    <!-- Navigation -->
-    <nav style="background: #01381c !important;" class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
-        <div class="container d-flex justify-content-center">
-            <a class="navbar-brand fw-bold d-flex align-items-center" href="{% url 'post_list' %}">
-                <img src="{% load static %}{% get_media_prefix %}Logo/site_logo.png" alt="The Daily Learning" height="40" class="me-2">
-                The Daily Learning
+    <!-- Top Centered Logo and Title -->
+    <div class="w-100 py-2 bg-white border-bottom shadow-sm" style="margin-top:0;">
+        <div class="container d-flex flex-column align-items-center justify-content-center">
+            <a class="d-flex align-items-center text-decoration-none" href="{% url 'post_list' %}">
+                <img src="{% load static %}{% get_media_prefix %}Logo/site_logo.png" alt="The Daily Learning" height="48" class="me-2">
+                <span class="fs-3 fw-bold text-dark">The Daily Learning</span>
             </a>
-            
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            
-            <div class="collapse navbar-collapse justify-content-center" id="navbarNav">
-                <ul class="navbar-nav me-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'post_list' %}">Home</a>
-                    </li>
-                    {% for category in categories %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'category_posts' category.slug %}">{{ category.name }}</a>
-                    </li>
-                    {% endfor %}
-                </ul>
-                
-                <ul class="navbar-nav">
+        </div>
+    </div>
+
+    <!-- Navigation Bar (Second Line) -->
+    <nav style="background: #01381c !important;" class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <!-- Left: Navigation Buttons -->
+                <div class="d-flex align-items-center">
+                    <button class="navbar-toggler me-2" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div class="collapse navbar-collapse show" id="navbarNav">
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'post_list' %}">Home</a>
+                            </li>
+                            {% for category in categories %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'category_posts' category.slug %}">{{ category.name }}</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+                <!-- Right: Dashboard/Login/Logout -->
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin_dashboard' %}">
@@ -123,7 +132,7 @@
     </nav>
 
     <!-- Main Content -->
-    <main class="container my-3 mt-5 mt-2 pt-4">
+    <main class="container my-3 mt-5 pt-4">
         {% block content %}
         {% endblock %}
     </main>
