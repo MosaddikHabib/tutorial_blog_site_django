@@ -323,3 +323,137 @@ def get_draft_posts(request):
         })
     
     return JsonResponse({'success': True, 'drafts': draft_list})
+
+
+@login_required(login_url='custom_login')
+def admin_manage_posts(request):
+    """Custom admin page to manage all posts"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    # Filter and search functionality
+    status_filter = request.GET.get('status', '')
+    category_filter = request.GET.get('category', '')
+    search_query = request.GET.get('search', '')
+    
+    posts = Post.objects.all().select_related('author', 'category')
+    
+    if status_filter:
+        posts = posts.filter(status=status_filter)
+    if category_filter:
+        posts = posts.filter(category__id=category_filter)
+    if search_query:
+        posts = posts.filter(
+            Q(title__icontains=search_query) | 
+            Q(content__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(posts, 20)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+    
+    categories = Category.objects.all()
+    
+    context = {
+        'posts': posts,
+        'categories': categories,
+        'status_filter': status_filter,
+        'category_filter': category_filter,
+        'search_query': search_query,
+    }
+    return render(request, 'blog/admin_manage_posts.html', context)
+
+
+@login_required(login_url='custom_login')
+def admin_manage_categories(request):
+    """Custom admin page to manage categories"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    categories = Category.objects.all().order_by('name')
+    
+    # Add new category
+    if request.method == 'POST' and 'add_category' in request.POST:
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        
+        if name:
+            slug = slugify(name)
+            counter = 1
+            original_slug = slug
+            while Category.objects.filter(slug=slug).exists():
+                slug = f"{original_slug}-{counter}"
+                counter += 1
+            
+            Category.objects.create(
+                name=name,
+                slug=slug,
+                description=description
+            )
+            messages.success(request, f'Category "{name}" created successfully!')
+            return redirect('admin_manage_categories')
+        else:
+            messages.error(request, 'Category name is required!')
+    
+    context = {
+        'categories': categories,
+    }
+    return render(request, 'blog/admin_manage_categories.html', context)
+
+
+@login_required(login_url='custom_login')
+def admin_edit_category(request, slug):
+    """Edit a category"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    category = get_object_or_404(Category, slug=slug)
+    
+    if request.method == 'POST':
+        name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        
+        if name:
+            category.name = name
+            category.description = description
+            # Update slug only if name changed
+            if category.name != name:
+                new_slug = slugify(name)
+                counter = 1
+                original_slug = new_slug
+                while Category.objects.filter(slug=new_slug).exclude(pk=category.pk).exists():
+                    new_slug = f"{original_slug}-{counter}"
+                    counter += 1
+                category.slug = new_slug
+            
+            category.save()
+            messages.success(request, f'Category "{name}" updated successfully!')
+            return redirect('admin_manage_categories')
+        else:
+            messages.error(request, 'Category name is required!')
+    
+    context = {
+        'category': category,
+    }
+    return render(request, 'blog/admin_edit_category.html', context)
+
+
+@login_required(login_url='custom_login')
+def admin_delete_category(request, slug):
+    """Delete a category"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    category = get_object_or_404(Category, slug=slug)
+    
+    if request.method == 'POST':
+        category_name = category.name
+        category.delete()
+        messages.success(request, f'Category "{category_name}" deleted successfully!')
+        return redirect('admin_manage_categories')
+    
+    context = {
+        'category': category,
+    }
+    return render(request, 'blog/admin_delete_category.html', context)

@@ -16,6 +16,10 @@ urlpatterns = [
     path('manage/create-post/', views.admin_create_post, name='admin_create_post'),
     path('manage/edit-post/<slug:slug>/', views.admin_edit_post, name='admin_edit_post'),
     path('manage/delete-post/<slug:slug>/', views.admin_delete_post, name='admin_delete_post'),
+    path('manage/posts/', views.admin_manage_posts, name='admin_manage_posts'),
+    path('manage/categories/', views.admin_manage_categories, name='admin_manage_categories'),
+    path('manage/category/edit/<slug:slug>/', views.admin_edit_category, name='admin_edit_category'),
+    path('manage/category/delete/<slug:slug>/', views.admin_delete_category, name='admin_delete_category'),
     
     # Auto-save draft functionality
     path('api/auto-save-draft/', views.auto_save_draft, name='auto_save_draft'),

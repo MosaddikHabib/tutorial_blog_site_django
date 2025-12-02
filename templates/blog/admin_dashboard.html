@@ -57,13 +57,18 @@
 						</a>
 					</li>
 					<li class="nav-item mb-2">
-						<a class="nav-link sidebar-link" href="/admin/blog/post/">
+						<a class="nav-link sidebar-link" href="{% url 'admin_manage_posts' %}">
 							<i class="fas fa-list me-2"></i>All Posts
 						</a>
 					</li>
 					<li class="nav-item mb-2">
-						<a class="nav-link sidebar-link" href="/admin/blog/category/">
+						<a class="nav-link sidebar-link" href="{% url 'admin_manage_categories' %}">
 							<i class="fas fa-tags me-2"></i>Categories
+						</a>
+					</li>
+					<li class="nav-item mb-2">
+						<a class="nav-link sidebar-link" href="/admin/" target="_blank">
+							<i class="fas fa-cog me-2"></i>Django Admin
 						</a>
 					</li>
 				</ul>
@@ -120,11 +125,14 @@
 								<a href="{% url 'admin_create_post' %}" class="btn btn-primary me-2">
 									<i class="fas fa-plus me-1"></i>Create New Post
 								</a>
-								<a href="/admin/blog/post/" class="btn btn-outline-primary me-2">
+								<a href="{% url 'admin_manage_posts' %}" class="btn btn-outline-primary me-2">
 									<i class="fas fa-list me-1"></i>Manage Posts
 								</a>
-								<a href="/admin/blog/category/" class="btn btn-outline-secondary">
+								<a href="{% url 'admin_manage_categories' %}" class="btn btn-outline-secondary me-2">
 									<i class="fas fa-tags me-1"></i>Manage Categories
+								</a>
+								<a href="/admin/" class="btn btn-outline-dark" target="_blank">
+									<i class="fas fa-cog me-1"></i>Django Admin
 								</a>
 							</div>
 						</div>
@@ -170,14 +178,13 @@
 												<a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-sm btn-outline-info">
 													<i class="fas fa-eye"></i>
 												</a>
+												<a href="{% url 'admin_delete_post' post.slug %}" class="btn btn-sm btn-outline-danger">
+													<i class="fas fa-trash"></i>
+												</a>
 												{% else %}
-												<!-- Fallback to Django admin change page when slug is missing -->
-												<a href="/admin/blog/post/{{ post.id }}/change/" class="btn btn-sm btn-outline-primary" title="Edit in admin">
-													<i class="fas fa-edit"></i>
-												</a>
-												<a href="/admin/blog/post/{{ post.id }}/change/" target="_blank" class="btn btn-sm btn-outline-info" title="View in admin">
-													<i class="fas fa-eye"></i>
-												</a>
+												<button class="btn btn-sm btn-outline-secondary" disabled title="No slug available">
+													<i class="fas fa-exclamation-triangle"></i>
+												</button>
 												{% endif %}
 											</td>
 										</tr>
