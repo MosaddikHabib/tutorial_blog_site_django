@@ -6,23 +6,42 @@ from django.utils.text import slugify
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
+from django.db.models import Q
 import json
-from .models import Post, Category
+from .models import Post, Category, HomePageContent
 
 
 def post_list(request):
-    """Display list of published posts"""
-    posts = Post.objects.filter(status='published').select_related('author', 'category')
+    """Display homepage with search and summary"""
+    homepage_content = HomePageContent.get_content()
     categories = Category.objects.all()
     
+    # Search functionality
+    search_query = request.GET.get('search', '')
+    if search_query:
+        posts = Post.objects.filter(
+            Q(title__icontains=search_query) | 
+            Q(content__icontains=search_query) | 
+            Q(excerpt__icontains=search_query),
+            status='published'
+        ).select_related('author', 'category')
+    else:
+        posts = Post.objects.filter(status='published').select_related('author', 'category')
+    
+    # Get recent posts for summary cards
+    recent_posts = Post.objects.filter(status='published').select_related('author', 'category')[:6]
+    
     # Pagination
-    paginator = Paginator(posts, 6)  # Show 6 posts per page
+    paginator = Paginator(posts, 9)
     page_number = request.GET.get('page')
     posts = paginator.get_page(page_number)
     
     context = {
+        'homepage_content': homepage_content,
         'posts': posts,
+        'recent_posts': recent_posts,
         'categories': categories,
+        'search_query': search_query,
     }
     return render(request, 'blog/post_list.html', context)
 

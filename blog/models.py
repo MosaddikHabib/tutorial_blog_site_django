@@ -5,6 +5,27 @@ from django.utils.text import slugify
 from django.urls import reverse
 
 
+class HomePageContent(models.Model):
+    """Model to store homepage editable content"""
+    hero_title = models.CharField(max_length=200, default="Welcome to The Daily Learning")
+    hero_subtitle = models.TextField(max_length=500, default="Discover insights, tutorials, and knowledge across various topics")
+    about_section = models.TextField(default="We share quality content to help you learn and grow. Explore our categories and find what interests you.")
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Homepage Content"
+        verbose_name_plural = "Homepage Content"
+
+    def __str__(self):
+        return "Homepage Content"
+
+    @classmethod
+    def get_content(cls):
+        """Get or create homepage content"""
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+
+
 class Category(models.Model):
     name = models.CharField(max_length=100)
     slug = models.SlugField(unique=True)

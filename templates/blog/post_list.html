@@ -1,22 +1,81 @@
 {% extends 'blog/base.html' %}
 
-{% block title %}Blog Posts - Blog Site{% endblock %}
+{% block title %}{{ homepage_content.hero_title }} - Blog Site{% endblock %}
 
 {% block content %}
+<!-- Hero Section -->
+<div class="hero-section mb-5 p-5 text-center" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 15px;">
+    <h1 class="display-3 fw-bold text-white mb-3">{{ homepage_content.hero_title }}</h1>
+    <p class="lead text-white mb-4">{{ homepage_content.hero_subtitle }}</p>
+    
+    <!-- Search Bar -->
+    <form method="get" action="{% url 'post_list' %}" class="mx-auto" style="max-width: 600px;">
+        <div class="input-group input-group-lg shadow-lg">
+            <input type="text" name="search" class="form-control" placeholder="Search for tutorials, guides, tips..." value="{{ search_query }}" aria-label="Search">
+            <button class="btn btn-dark" type="submit">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+    </form>
+</div>
+
+<!-- About Section -->
+<div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="mb-3"><i class="fas fa-info-circle me-2"></i>About Us</h3>
+                <p class="lead">{{ homepage_content.about_section }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Overview Cards -->
+<div class="row mb-5">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-th-large me-2"></i>Explore Categories</h2>
+    </div>
+    {% for category in categories %}
+    <div class="col-md-4 col-lg-3 mb-4">
+        <a href="{% url 'category_posts' category.slug %}" class="text-decoration-none">
+            <div class="card h-100 border-0 shadow-sm hover-item" style="transition: all 0.3s;">
+                <div class="card-body text-center">
+                    <i class="fas fa-folder fa-3x mb-3" style="color: #667eea;"></i>
+                    <h5 class="card-title text-dark">{{ category.name }}</h5>
+                    <p class="text-muted small">{{ category.posts.count }} post{{ category.posts.count|pluralize }}</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Recent Posts -->
+{% if search_query %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-4">
+            <i class="fas fa-search me-2"></i>Search Results for "{{ search_query }}"
+            <small class="text-muted">({{ posts.paginator.count }} result{{ posts.paginator.count|pluralize }})</small>
+        </h2>
+    </div>
+</div>
+{% else %}
+<div class="row mb-4">
+    <div class="col-12">
+        <h2 class="mb-4"><i class="fas fa-newspaper me-2"></i>Latest Posts</h2>
+    </div>
+</div>
+{% endif %}
+
 <div class="row">
     <!-- Main Content -->
     <div class="col-12">
-        <div class="mb-4">
-            <h1 class="display-4 fw-bold text-dark mb-3">
-                <i class="fas fa-newspaper me-3"></i>Latest Posts
-            </h1>
-            <hr class="border-dark">
-        </div>
-
         {% if posts %}
             <div class="row">
                 {% for post in posts %}
-                <div class="col-md-6 mb-4 fade-in-up delay-{% cycle '1' '2' '3' '4' '5' '6' %}">
+                <div class="col-md-6 col-lg-4 mb-4 fade-in-up delay-{% cycle '1' '2' '3' '4' '5' '6' %}">
                     <div class="card h-100 shadow-sm border-0">
                         {% if post.featured_image %}
                         <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">

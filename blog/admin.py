@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.html import format_html
-from .models import Category, Post, PostImage
+from .models import Category, Post, PostImage, HomePageContent
 
 
 class PostImageInline(admin.TabularInline):
@@ -48,6 +48,27 @@ class PostImageAdmin(admin.ModelAdmin):
     list_display = ['post', 'caption', 'created_at']
     list_filter = ['created_at']
     search_fields = ['post__title', 'caption']
+
+
+@admin.register(HomePageContent)
+class HomePageContentAdmin(admin.ModelAdmin):
+    list_display = ['hero_title', 'updated_at']
+    fieldsets = (
+        ('Hero Section', {
+            'fields': ('hero_title', 'hero_subtitle')
+        }),
+        ('About Section', {
+            'fields': ('about_section',)
+        }),
+    )
+    
+    def has_add_permission(self, request):
+        # Only allow one instance
+        return not HomePageContent.objects.exists()
+    
+    def has_delete_permission(self, request, obj=None):
+        # Prevent deletion
+        return False
 
 
 # Customize admin site
