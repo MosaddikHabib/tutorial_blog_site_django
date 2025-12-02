@@ -37,12 +37,13 @@ h3 { font-size: 1.75rem; }
     border: none;
     border-radius: 12px;
     overflow: hidden;
-    background: #fff;
+    background: var(--card-bg, #fff);
+    color: var(--text-color, #1f2937);
 }
 
 .card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15) !important;
+    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.15) !important;
 }
 
 .card-img-top {
@@ -55,7 +56,7 @@ h3 { font-size: 1.75rem; }
 
 .card-header {
     border-bottom: none;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
     color: #fff;
     font-weight: 600;
     padding: 1rem 1.25rem;
@@ -105,13 +106,13 @@ h3 { font-size: 1.75rem; }
 }
 
 .btn-dark {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
     color: #fff;
 }
 
 .btn-dark:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
 }
 
 /* Links */
@@ -127,7 +128,7 @@ a {
 .hover-item:hover {
     background-color: #f3f4f6 !important;
     transform: translateX(5px);
-    border-left: 3px solid #667eea;
+    border-left: 3px solid #dc2626;
 }
 
 /* Badges */
@@ -139,7 +140,7 @@ a {
 
 /* Image Placeholder */
 .image-placeholder {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -154,7 +155,7 @@ a {
 }
 
 .breadcrumb-item a {
-    color: #667eea;
+    color: #dc2626;
     font-weight: 500;
 }
 
@@ -167,19 +168,19 @@ a {
     border-radius: 8px;
     margin: 0 4px;
     font-weight: 500;
-    color: #667eea;
+    color: #dc2626;
     border: 2px solid #e9ecef;
 }
 
 .pagination .page-link:hover {
-    background: #667eea;
+    background: #dc2626;
     color: #fff;
-    border-color: #667eea;
+    border-color: #dc2626;
 }
 
 .pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: #667eea;
+    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    border-color: #dc2626;
 }
 
 /* Post detail layout */

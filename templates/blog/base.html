@@ -17,13 +17,38 @@
     <!-- Custom Color Palette -->
     <style>
         :root {
-            --primary-color: #3b82f6;
-            --secondary-color: #8b5cf6;
-            --accent-color: #10b981;
+            --primary-color: #dc2626;
+            --secondary-color: #ef4444;
+            --accent-color: #f97316;
             --dark-color: #1e293b;
-            --light-color: #f8fafc;
-            --text-color: #374151;
+            --light-color: #ffffff;
+            --text-color: #1f2937;
             --border-color: #e5e7eb;
+            --bg-color: #ffffff;
+            --card-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --primary-color: #dc2626;
+            --secondary-color: #991b1b;
+            --accent-color: #ea580c;
+            --dark-color: #0f172a;
+            --light-color: #1e293b;
+            --text-color: #f1f5f9;
+            --border-color: #334155;
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            color: var(--text-color);
         }
 
         .navbar-dark {
@@ -89,6 +114,42 @@
             transform: translateX(5px);
         }
 
+        /* Dark mode toggle */
+        .theme-toggle {
+            background: transparent;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            color: white;
+            border-radius: 50px;
+            padding: 0.4rem 0.8rem;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+        }
+
+        [data-theme="dark"] .hover-item:hover {
+            background-color: #374151 !important;
+        }
+
+        [data-theme="dark"] .text-dark {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .text-muted {
+            color: #9ca3af !important;
+        }
+
+        [data-theme="dark"] .bg-light {
+            background-color: var(--card-bg) !important;
+        }
+
+        [data-theme="dark"] .border-dark {
+            border-color: var(--border-color) !important;
+        }
+
         /* Card hover effects */
         .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -152,7 +213,13 @@
                     </div>
                 </div>
                 <!-- Right: Dashboard/Login/Logout -->
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+                    <!-- Theme Toggle -->
+                    <li class="nav-item me-2">
+                        <button class="theme-toggle btn btn-sm" id="themeToggle" onclick="toggleTheme()">
+                            <i class="fas fa-moon" id="themeIcon"></i>
+                        </button>
+                    </li>
                     {% if user.is_authenticated %}
                         {% if user.is_superuser %}
                         <li class="nav-item">
@@ -201,5 +268,29 @@
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Dark Mode Toggle Script -->
+    <script>
+        // Check for saved theme preference or default to light mode
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', currentTheme);
+        updateThemeIcon(currentTheme);
+
+        function toggleTheme() {
+            const theme = document.documentElement.getAttribute('data-theme');
+            const newTheme = theme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = theme === 'light' ? 'fas fa-moon' : 'fas fa-sun';
+            }
+        }
+    </script>
 </body>
 </html>
