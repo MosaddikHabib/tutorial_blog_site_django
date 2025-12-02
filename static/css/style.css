@@ -43,7 +43,7 @@ h3 { font-size: 1.75rem; }
 
 .card:hover {
     transform: translateY(-8px);
-    box-shadow: 0 12px 24px rgba(220, 38, 38, 0.15) !important;
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2) !important;
 }
 
 .card-img-top {
@@ -56,7 +56,7 @@ h3 { font-size: 1.75rem; }
 
 .card-header {
     border-bottom: none;
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: #fff;
     font-weight: 600;
     padding: 1rem 1.25rem;
@@ -106,13 +106,13 @@ h3 { font-size: 1.75rem; }
 }
 
 .btn-dark {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     color: #fff;
 }
 
 .btn-dark:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 /* Links */
@@ -128,7 +128,7 @@ a {
 .hover-item:hover {
     background-color: #f3f4f6 !important;
     transform: translateX(5px);
-    border-left: 3px solid #dc2626;
+    border-left: 3px solid #3b82f6;
 }
 
 /* Badges */
@@ -140,7 +140,7 @@ a {
 
 /* Image Placeholder */
 .image-placeholder {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -155,7 +155,7 @@ a {
 }
 
 .breadcrumb-item a {
-    color: #dc2626;
+    color: #3b82f6;
     font-weight: 500;
 }
 
@@ -168,19 +168,19 @@ a {
     border-radius: 8px;
     margin: 0 4px;
     font-weight: 500;
-    color: #dc2626;
+    color: #3b82f6;
     border: 2px solid #e9ecef;
 }
 
 .pagination .page-link:hover {
-    background: #dc2626;
+    background: #3b82f6;
     color: #fff;
-    border-color: #dc2626;
+    border-color: #3b82f6;
 }
 
 .pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, #dc2626 0%, #ef4444 100%);
-    border-color: #dc2626;
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    border-color: #3b82f6;
 }
 
 /* Post detail layout */

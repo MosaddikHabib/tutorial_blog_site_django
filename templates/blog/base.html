@@ -17,42 +17,60 @@
     <!-- Custom Color Palette -->
     <style>
         :root {
-            --primary-color: #dc2626;
-            --secondary-color: #ef4444;
-            --accent-color: #f97316;
+            --primary-color: #3b82f6;
+            --secondary-color: #2563eb;
+            --accent-color: #8b5cf6;
             --dark-color: #1e293b;
             --light-color: #ffffff;
             --text-color: #1f2937;
             --border-color: #e5e7eb;
-            --bg-color: #ffffff;
+            --bg-color: #f8fafc;
             --card-bg: #ffffff;
+            --nav-bg-start: #1e40af;
+            --nav-bg-end: #3b82f6;
         }
 
         [data-theme="dark"] {
-            --primary-color: #dc2626;
-            --secondary-color: #991b1b;
-            --accent-color: #ea580c;
+            --primary-color: #60a5fa;
+            --secondary-color: #3b82f6;
+            --accent-color: #a78bfa;
             --dark-color: #0f172a;
             --light-color: #1e293b;
             --text-color: #f1f5f9;
             --border-color: #334155;
             --bg-color: #0f172a;
             --card-bg: #1e293b;
+            --nav-bg-start: #1e3a8a;
+            --nav-bg-end: #2563eb;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            transition: background-color 0.3s, color 0.3s;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
 
         .card {
-            background-color: var(--card-bg);
-            color: var(--text-color);
+            background-color: var(--card-bg) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color) !important;
+            transition: all 0.3s ease;
         }
 
         .navbar-dark {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            background: linear-gradient(135deg, var(--nav-bg-start), var(--nav-bg-end)) !important;
+        }
+
+        .navbar-dark .nav-link {
+            color: rgba(255, 255, 255, 0.95) !important;
+            font-weight: 600 !important;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-dark .nav-link:hover {
+            color: #ffffff !important;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
         }
 
         .btn-primary {
@@ -114,30 +132,34 @@
             transform: translateX(5px);
         }
 
-        /* Dark mode toggle */
+        /* Modern Dark Mode Toggle */
         .theme-toggle {
-            background: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-            border-radius: 50px;
-            padding: 0.4rem 0.8rem;
-            transition: all 0.3s;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            border-radius: 25px;
+            padding: 0.4rem 0.9rem;
+            transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
         }
 
         .theme-toggle:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.6);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
-        [data-theme=\"dark\"] .theme-toggle {
-            border-color: white;
-            color: white;
+        .theme-toggle i {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            display: inline-block;
         }
 
-        [data-theme=\"dark\"] .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.1);
+        .theme-toggle:active {
+            transform: scale(0.95);
         }
 
         /* Header stays light in both themes */
@@ -215,7 +237,19 @@
         }
 
         [data-theme="dark"] .card:hover {
-            box-shadow: 0 12px 24px rgba(220, 38, 38, 0.3) !important;
+            box-shadow: 0 12px 24px rgba(59, 130, 246, 0.3) !important;
+        }
+
+        [data-theme="dark"] .card-header,
+        [data-theme="dark"] .card-footer {
+            background-color: rgba(15, 23, 42, 0.5) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .list-group-item {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-color) !important;
         }
 
         /* Image placeholders in dark mode */
@@ -280,7 +314,7 @@
 
         /* Hero section dark mode */
         [data-theme="dark"] .hero-section {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+            background: linear-gradient(135deg, var(--nav-bg-start) 0%, var(--nav-bg-end) 100%) !important;
         }
 
         /* Fix icon colors in dark mode */
