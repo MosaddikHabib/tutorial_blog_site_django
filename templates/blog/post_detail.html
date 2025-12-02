@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row detail-layout gx-4 gy-5">
     <!-- Main Content -->
-    <div class="col-12 col-lg-8">
+    <div class="col-12">
         <div class="detail-main-scroll">
         <!-- Post Header -->
         <div class="mb-4">
@@ -102,80 +102,6 @@
                 </div>
             </div>
         </div>
-        </div>
-    </div>
-
-    <!-- Sidebar -->
-    <div class="col-12 col-lg-4">
-        <div class="detail-sidebar-scroll">
-            <!-- Post Info -->
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-dark text-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>Post Information
-                    </h5>
-                </div>
-                <div class="card-body">
-                    <div class="mb-3">
-                        <strong>Author:</strong><br>
-                        <span class="text-muted">{{ post.author.get_full_name|default:post.author.username }}</span>
-                    </div>
-                    <div class="mb-3">
-                        <strong>Category:</strong><br>
-                        <a href="{% url 'category_posts' post.category.slug %}" class="text-dark text-decoration-none">
-                            {{ post.category.name }}
-                        </a>
-                    </div>
-                    <div class="mb-3">
-                        <strong>Published:</strong><br>
-                        <span class="text-muted">{{ post.created_at|date:"F d, Y" }}</span>
-                    </div>
-                    {% if post.updated_at != post.created_at %}
-                    <div>
-                        <strong>Last Updated:</strong><br>
-                        <span class="text-muted">{{ post.updated_at|date:"F d, Y" }}</span>
-                    </div>
-                    {% endif %}
-                </div>
-            </div>
-
-            <!-- Related Posts -->
-            {% if related_posts %}
-            <div class="card border-0 shadow-sm mb-4">
-                <div class="card-header bg-dark text-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-newspaper me-2"></i>Related Posts
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% for related_post in related_posts %}
-                    <div class="mb-3">
-                        <a href="{% url 'post_detail' related_post.slug %}" class="text-dark text-decoration-none">
-                            <h6 class="mb-1">{{ related_post.title }}</h6>
-                        </a>
-                        <small class="text-muted">{{ related_post.created_at|date:"M d, Y" }}</small>
-                    </div>
-                    {% if not forloop.last %}<hr class="my-2">{% endif %}
-                    {% endfor %}
-                </div>
-            </div>
-            {% endif %}
-
-            <!-- Categories -->
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-dark text-light">
-                    <h5 class="mb-0">
-                        <i class="fas fa-tags me-2"></i>All Categories
-                    </h5>
-                </div>
-                <div class="card-body">
-                    {% for category in categories %}
-                    <a href="{% url 'category_posts' category.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-item" style="transition: all 0.2s;">
-                        <i class="fas fa-folder me-2"></i>{{ category.name }}
-                    </a>
-                    {% endfor %}
-                </div>
-            </div>
         </div>
     </div>
 </div>
