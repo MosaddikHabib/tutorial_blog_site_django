@@ -87,10 +87,39 @@ def category_posts(request, slug):
 
 # Custom Admin Views
 @login_required
+def user_dashboard(request):
+    """Regular user dashboard"""
+    if not request.user.is_staff:
+        messages.error(request, 'You need to be a staff member to access the dashboard.')
+        return redirect('post_list')
+    
+    # If superuser, redirect to admin dashboard
+    if request.user.is_superuser:
+        return redirect('admin_dashboard')
+    
+    posts = Post.objects.filter(author=request.user).order_by('-created_at')[:10]
+    stats = {
+        'total_posts': Post.objects.filter(author=request.user).count(),
+        'published_posts': Post.objects.filter(author=request.user, status='published').count(),
+        'draft_posts': Post.objects.filter(author=request.user, status='draft').count(),
+    }
+    
+    context = {
+        'posts': posts,
+        'stats': stats,
+    }
+    return render(request, 'blog/user_dashboard.html', context)
+
+
+@login_required
 def admin_dashboard(request):
     """Custom admin dashboard"""
     if not request.user.is_staff:
         return redirect('post_list')
+    
+    # If not superuser, redirect to user dashboard
+    if not request.user.is_superuser:
+        return redirect('user_dashboard')
     
     posts = Post.objects.filter(author=request.user).order_by('-created_at')[:10]
     categories = Category.objects.all()
@@ -537,7 +566,7 @@ def admin_create_user(request):
             first_name=first_name,
             last_name=last_name,
             is_superuser=is_superuser,
-            is_staff=is_superuser,  # Staff status matches superuser
+            is_staff=True,  # All users are staff (can access dashboard and create posts)
             password=make_password(password)
         )
         
@@ -584,7 +613,7 @@ def admin_edit_user(request, user_id):
         user.first_name = first_name
         user.last_name = last_name
         user.is_superuser = is_superuser
-        user.is_staff = is_superuser
+        user.is_staff = True  # All users are staff (can access dashboard and create posts)
         
         # Update password if provided
         if new_password:

@@ -11,6 +11,9 @@ urlpatterns = [
     path('post/<slug:slug>/', views.post_detail, name='post_detail'),
     path('category/<slug:slug>/', views.category_posts, name='category_posts'),
     
+    # User Dashboard
+    path('dashboard/', views.user_dashboard, name='user_dashboard'),
+    
     # Custom Admin URLs - using 'manage' prefix to avoid conflict with Django admin
     path('manage/', views.admin_dashboard, name='admin_dashboard'),
     path('manage/create-post/', views.admin_create_post, name='admin_create_post'),

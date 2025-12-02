@@ -15,7 +15,7 @@
     <div class="col-md-8 col-12">
         <div class="card">
             <div class="card-header bg-white">
-                <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit User: {{ edit_user.username }}</h4>
+                <h4 class="mb-0"><i class="fas fa-user-edit me-2"></i>Edit User: {{ edited_user.username }}</h4>
             </div>
             <div class="card-body">
                 <form method="post">
@@ -25,13 +25,13 @@
                         <div class="col-md-6 mb-3">
                             <label for="username" class="form-label">Username <span class="text-danger">*</span></label>
                             <input type="text" class="form-control" id="username" name="username" 
-                                   value="{{ edit_user.username }}" required>
+                                   value="{{ edited_user.username }}" required>
                         </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="email" class="form-label">Email</label>
                             <input type="email" class="form-control" id="email" name="email" 
-                                   value="{{ edit_user.email }}">
+                                   value="{{ edited_user.email }}">
                         </div>
                     </div>
                     
@@ -39,20 +39,20 @@
                         <div class="col-md-6 mb-3">
                             <label for="first_name" class="form-label">First Name</label>
                             <input type="text" class="form-control" id="first_name" name="first_name" 
-                                   value="{{ edit_user.first_name }}">
+                                   value="{{ edited_user.first_name }}">
                         </div>
                         
                         <div class="col-md-6 mb-3">
                             <label for="last_name" class="form-label">Last Name</label>
                             <input type="text" class="form-control" id="last_name" name="last_name" 
-                                   value="{{ edit_user.last_name }}">
+                                   value="{{ edited_user.last_name }}">
                         </div>
                     </div>
                     
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="is_active" name="is_active" 
-                                   {% if edit_user.is_active %}checked{% endif %}>
+                                   {% if edited_user.is_active %}checked{% endif %}>
                             <label class="form-check-label" for="is_active">
                                 <strong>Active Account</strong>
                                 <small class="d-block text-muted">Inactive users cannot log in</small>
@@ -63,7 +63,7 @@
                     <div class="mb-3">
                         <div class="form-check form-switch">
                             <input class="form-check-input" type="checkbox" id="is_superuser" name="is_superuser" 
-                                   {% if edit_user.is_superuser %}checked{% endif %}>
+                                   {% if edited_user.is_superuser %}checked{% endif %}>
                             <label class="form-check-label" for="is_superuser">
                                 <strong>Admin User</strong>
                                 <small class="d-block text-muted">Admins can manage all posts, categories, and users</small>
@@ -101,12 +101,12 @@
             <div class="card-body">
                 <div class="row text-muted">
                     <div class="col-md-6">
-                        <small><i class="fas fa-calendar-plus me-1"></i><strong>Joined:</strong> {{ edit_user.date_joined|date:"F d, Y" }}</small>
+                        <small><i class="fas fa-calendar-plus me-1"></i><strong>Joined:</strong> {{ edited_user.date_joined|date:"F d, Y" }}</small>
                     </div>
                     <div class="col-md-6">
                         <small><i class="fas fa-clock me-1"></i><strong>Last Login:</strong> 
-                            {% if edit_user.last_login %}
-                                {{ edit_user.last_login|date:"F d, Y H:i" }}
+                            {% if edited_user.last_login %}
+                                {{ edited_user.last_login|date:"F d, Y H:i" }}
                             {% else %}
                                 Never
                             {% endif %}
