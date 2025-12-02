@@ -137,6 +137,51 @@
             color: var(--primary-color);
             font-weight: 700;
         }
+        
+        /* Responsive Design */
+        @media (max-width: 767px) {
+            .container {
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+            .card {
+                margin-bottom: 1rem;
+            }
+            .card-header h3 {
+                font-size: 1.25rem;
+            }
+            .btn {
+                font-size: 0.9rem;
+                padding: 10px 20px;
+            }
+            .ql-toolbar {
+                font-size: 0.85rem;
+            }
+            .form-control, .form-select {
+                font-size: 0.9rem;
+            }
+            .row .col-md-6 {
+                margin-bottom: 1rem;
+            }
+        }
+        
+        @media (max-width: 575px) {
+            .navbar-brand {
+                font-size: 1rem;
+            }
+            .d-flex.justify-content-between,
+            .d-flex.gap-2 {
+                flex-direction: column;
+                gap: 0.5rem !important;
+            }
+            .d-flex.justify-content-between .btn,
+            .d-flex.gap-2 .btn {
+                width: 100%;
+            }
+            .ql-editor {
+                min-height: 200px;
+            }
+        }
     </style>
 </head>
 <body>
