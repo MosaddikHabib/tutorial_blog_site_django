@@ -3,9 +3,10 @@
 {% block title %}{{ post.title }} - Blog Site{% endblock %}
 
 {% block content %}
-<div class="row">
+<div class="row detail-layout gx-4 gy-5">
     <!-- Main Content -->
-    <div class="col-lg-8">
+    <div class="col-12 col-lg-8">
+        <div class="detail-main-scroll">
         <!-- Post Header -->
         <div class="mb-4">
             <nav aria-label="breadcrumb">
@@ -88,24 +89,25 @@
 
         <!-- Navigation -->
         <div class="mt-5 pt-4 border-top">
-            <div class="row">
+            <div class="row g-3">
                 <div class="col-md-6">
-                    <a href="{% url 'post_list' %}" class="btn btn-outline-dark">
+                    <a href="{% url 'post_list' %}" class="btn btn-outline-dark w-100">
                         <i class="fas fa-arrow-left me-2"></i>Back to Posts
                     </a>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <a href="{% url 'category_posts' post.category.slug %}" class="btn btn-outline-dark">
+                    <a href="{% url 'category_posts' post.category.slug %}" class="btn btn-outline-dark w-100">
                         More in {{ post.category.name }} <i class="fas fa-arrow-right ms-2"></i>
                     </a>
                 </div>
             </div>
         </div>
+        </div>
     </div>
 
     <!-- Sidebar -->
-    <div class="col-lg-4">
-        <div class="sticky-top" style="top: 2rem;">
+    <div class="col-12 col-lg-4">
+        <div class="detail-sidebar-scroll">
             <!-- Post Info -->
             <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-dark text-light">
@@ -168,7 +170,7 @@
                 </div>
                 <div class="card-body">
                     {% for category in categories %}
-                    <a href="{% url 'category_posts' category.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-bg">
+                    <a href="{% url 'category_posts' category.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-item" style="transition: all 0.2s;">
                         <i class="fas fa-folder me-2"></i>{{ category.name }}
                     </a>
                     {% endfor %}

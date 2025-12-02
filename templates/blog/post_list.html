@@ -16,13 +16,13 @@
         {% if posts %}
             <div class="row">
                 {% for post in posts %}
-                <div class="col-md-6 mb-4">
+                <div class="col-md-6 mb-4 fade-in-up delay-{% cycle '1' '2' '3' '4' '5' '6' %}">
                     <div class="card h-100 shadow-sm border-0">
                         {% if post.featured_image %}
                         <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}" style="height: 200px; object-fit: cover;">
                         {% else %}
-                        <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 200px;">
-                            <i class="fas fa-image fa-3x text-muted"></i>
+                        <div class="image-placeholder" style="height: 200px;">
+                            <i class="fas fa-image fa-2x"></i>
                         </div>
                         {% endif %}
                         
@@ -118,7 +118,7 @@
                 </div>
                 <div class="card-body">
                     {% for category in categories %}
-                    <a href="{% url 'category_posts' category.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-bg">
+                    <a href="{% url 'category_posts' category.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-item" style="transition: all 0.2s;">
                         <i class="fas fa-folder me-2"></i>{{ category.name }}
                     </a>
                     {% endfor %}

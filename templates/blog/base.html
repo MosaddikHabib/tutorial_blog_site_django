@@ -17,60 +17,104 @@
     <!-- Custom Color Palette -->
     <style>
         :root {
-            --primary-color: #2563eb;
-            --secondary-color: #06b6d4;
+            --primary-color: #3b82f6;
+            --secondary-color: #8b5cf6;
             --accent-color: #10b981;
             --dark-color: #1e293b;
             --light-color: #f8fafc;
-            --text-color: #334155;
-            --border-color: #e2e8f0;
+            --text-color: #374151;
+            --border-color: #e5e7eb;
         }
-        
+
         .navbar-dark {
-            /* background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important; */
-            background: #4ac22c;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
         }
-        
+
         .btn-primary {
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             border-color: var(--primary-color);
         }
-        
+
         .btn-primary:hover {
             background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
             border-color: var(--secondary-color);
         }
-        
+
         .btn-success {
             background: linear-gradient(135deg, var(--accent-color), #059669);
             border-color: var(--accent-color);
         }
-        
+
         .btn-success:hover {
             background: linear-gradient(135deg, #059669, var(--accent-color));
         }
-        
-        .card {
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        
+
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25);
         }
-        
-        body {
-            color: var(--text-color);
-            background-color: var(--light-color);
-        }
-        
+
         .navbar-brand img {
             filter: brightness(1.1);
         }
-        
+
         .footer-gradient {
-            background: linear-gradient(135deg, var(--dark-color), #334155);
+            background: linear-gradient(135deg, var(--dark-color), #374151);
+        }
+
+        /* Animation classes */
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out forwards;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .fade-in-up.delay-1 { animation-delay: 0.1s; }
+        .fade-in-up.delay-2 { animation-delay: 0.2s; }
+        .fade-in-up.delay-3 { animation-delay: 0.3s; }
+        .fade-in-up.delay-4 { animation-delay: 0.4s; }
+        .fade-in-up.delay-5 { animation-delay: 0.5s; }
+        .fade-in-up.delay-6 { animation-delay: 0.6s; }
+
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Hover effects for better UX */
+        .hover-item:hover {
+            background-color: #f3f4f6 !important;
+            transform: translateX(5px);
+        }
+
+        /* Card hover effects */
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.15) !important;
+        }
+
+        /* Better scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
         }
     </style>
 </head>
@@ -86,7 +130,7 @@
     </div>
 
     <!-- Navigation Bar (Second Line) -->
-    <nav style="background: #01381c !important;"  class="navbar navbar-expand-lg navbar-dark bg-dark position-sticky top-0 z-2">
+    <nav class="navbar navbar-expand-lg navbar-dark position-sticky top-0 z-2">
         <div class="container">
             <div class="d-flex w-100 justify-content-between align-items-center">
                 <!-- Left: Navigation Buttons -->
@@ -110,11 +154,13 @@
                 <!-- Right: Dashboard/Login/Logout -->
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
+                        {% if user.is_superuser %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'admin_dashboard' %}">
                                 <i class="fas fa-tachometer-alt me-1"></i>Dashboard
                             </a>
                         </li>
+                        {% endif %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'custom_logout' %}">
                                 <i class="fas fa-sign-out-alt me-1"></i>Logout
@@ -139,7 +185,7 @@
     </main>
 
     <!-- Footer -->
-    <footer style="background: #01381c !important;" class="footer-gradient text-light py-4 mt-5">
+    <footer class="footer-gradient text-light py-4 mt-5">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">

@@ -114,10 +114,10 @@
     </div>
 
     <!-- Sidebar -->
-    <div class="col-lg-4 d-flex flex-column align-items-center" style="min-height: 80vh;">
-        <div style="width:100%; max-width: 380px;">
+    <div class="col-lg-4">
+        <div class="category-sidebar-scroll">
             <!-- Categories -->
-            <div class="card border-0 shadow-sm mb-4 bg-light" >
+            <div class="card border-0 shadow-sm mb-4">
                 <div class="card-header bg-dark text-light">
                     <h5 class="mb-0">
                         <i class="fas fa-tags me-2"></i>All Categories
@@ -125,7 +125,7 @@
                 </div>
                 <div class="card-body">
                     {% for cat in categories %}
-                    <a href="{% url 'category_posts' cat.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded hover-bg {% if cat.slug == category.slug %}bg-light{% endif %}">
+                    <a href="{% url 'category_posts' cat.slug %}" class="d-block text-decoration-none text-dark mb-2 p-2 rounded {% if cat.slug == category.slug %}bg-primary bg-opacity-10 border border-primary{% else %}hover-item{% endif %}" style="transition: all 0.2s;">
                         <i class="fas fa-folder me-2"></i>{{ cat.name }}
                         {% if cat.slug == category.slug %}<i class="fas fa-check text-success ms-2"></i>{% endif %}
                     </a>
