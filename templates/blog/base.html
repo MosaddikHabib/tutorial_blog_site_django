@@ -140,17 +140,14 @@
             background: rgba(255, 255, 255, 0.1);
         }
 
-        /* Header dark mode */
-        [data-theme=\"dark\"] .bg-white {
-            background-color: var(--card-bg) !important;
+        /* Header stays light in both themes */
+        .top-header {
+            background-color: #ffffff !important;
+            border-color: #e5e7eb !important;
         }
 
-        [data-theme=\"dark\"] .border-bottom {
-            border-color: var(--border-color) !important;
-        }
-
-        [data-theme=\"dark\"] .shadow-sm {
-            box-shadow: 0 .125rem .25rem rgba(0,0,0,.3) !important;
+        [data-theme="dark"] .top-header .text-dark {
+            color: #1f2937 !important;
         }
 
         [data-theme="dark"] .hover-item:hover {
@@ -211,6 +208,36 @@
             background-color: var(--primary-color) !important;
         }
 
+        /* Ensure cards have dark background in dark mode */
+        [data-theme="dark"] .card {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .card:hover {
+            box-shadow: 0 12px 24px rgba(220, 38, 38, 0.3) !important;
+        }
+
+        /* Image placeholders in dark mode */
+        [data-theme="dark"] .image-placeholder {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+        }
+
+        /* Form inputs in dark mode */
+        [data-theme="dark"] .form-control,
+        [data-theme="dark"] .form-select {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .form-control:focus,
+        [data-theme="dark"] .form-select:focus {
+            background-color: var(--card-bg) !important;
+            border-color: var(--primary-color) !important;
+            color: var(--text-color) !important;
+        }
+
         /* Card hover effects */
         .card {
             transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -242,7 +269,7 @@
 </head>
 <body>
     <!-- Top Centered Logo and Title -->
-    <div class="w-100 py-2 bg-white border-bottom shadow-sm">
+    <div class="w-100 py-2 bg-white border-bottom shadow-sm top-header">
         <div class="container d-flex align-items-center justify-content-between position-relative">
             <div style="width: 60px;"></div> <!-- Spacer for centering -->
             <a class="d-flex align-items-center text-decoration-none position-absolute start-50 translate-middle-x" href="{% url 'post_list' %}">
