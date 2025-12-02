@@ -117,8 +117,8 @@
         /* Dark mode toggle */
         .theme-toggle {
             background: transparent;
-            border: 2px solid rgba(255, 255, 255, 0.5);
-            color: white;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
             border-radius: 50px;
             padding: 0.4rem 0.8rem;
             transition: all 0.3s;
@@ -126,8 +126,31 @@
         }
 
         .theme-toggle:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        [data-theme=\"dark\"] .theme-toggle {
             border-color: white;
+            color: white;
+        }
+
+        [data-theme=\"dark\"] .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* Header dark mode */
+        [data-theme=\"dark\"] .bg-white {
+            background-color: var(--card-bg) !important;
+        }
+
+        [data-theme=\"dark\"] .border-bottom {
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme=\"dark\"] .shadow-sm {
+            box-shadow: 0 .125rem .25rem rgba(0,0,0,.3) !important;
         }
 
         [data-theme="dark"] .hover-item:hover {
@@ -148,6 +171,44 @@
 
         [data-theme="dark"] .border-dark {
             border-color: var(--border-color) !important;
+        }
+
+        /* Fix black text in dark mode */
+        [data-theme="dark"] h1,
+        [data-theme="dark"] h2,
+        [data-theme="dark"] h3,
+        [data-theme="dark"] h4,
+        [data-theme="dark"] h5,
+        [data-theme="dark"] h6,
+        [data-theme="dark"] p,
+        [data-theme="dark"] span,
+        [data-theme="dark"] a:not(.nav-link):not(.btn) {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .card-title,
+        [data-theme="dark"] .card-text {
+            color: var(--text-color) !important;
+        }
+
+        /* Fix breadcrumb and button text colors in dark mode */
+        [data-theme="dark"] .breadcrumb-item a,
+        [data-theme="dark"] .page-link {
+            color: var(--text-color) !important;
+        }
+
+        [data-theme="dark"] .btn-outline-dark {
+            color: var(--text-color) !important;
+            border-color: var(--border-color) !important;
+        }
+
+        [data-theme="dark"] .btn-outline-dark:hover {
+            background-color: var(--primary-color) !important;
+            color: white !important;
+        }
+
+        [data-theme="dark"] .badge.bg-dark {
+            background-color: var(--primary-color) !important;
         }
 
         /* Card hover effects */
@@ -182,11 +243,16 @@
 <body>
     <!-- Top Centered Logo and Title -->
     <div class="w-100 py-2 bg-white border-bottom shadow-sm">
-        <div class="container d-flex flex-column align-items-center justify-content-center">
-            <a class="d-flex align-items-center text-decoration-none" href="{% url 'post_list' %}">
+        <div class="container d-flex align-items-center justify-content-between position-relative">
+            <div style="width: 60px;"></div> <!-- Spacer for centering -->
+            <a class="d-flex align-items-center text-decoration-none position-absolute start-50 translate-middle-x" href="{% url 'post_list' %}">
                 <img src="{% load static %}{% get_media_prefix %}Logo/site_logo.png" alt="The Daily Learning" height="48" class="me-2">
                 <span class="fs-3 fw-bold text-dark">The Daily Learning</span>
             </a>
+            <!-- Theme Toggle on the Right -->
+            <button class="theme-toggle btn btn-sm" id="themeToggle" onclick="toggleTheme()">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
         </div>
     </div>
 
@@ -213,13 +279,7 @@
                     </div>
                 </div>
                 <!-- Right: Dashboard/Login/Logout -->
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
-                    <!-- Theme Toggle -->
-                    <li class="nav-item me-2">
-                        <button class="theme-toggle btn btn-sm" id="themeToggle" onclick="toggleTheme()">
-                            <i class="fas fa-moon" id="themeIcon"></i>
-                        </button>
-                    </li>
+                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
                     {% if user.is_authenticated %}
                         {% if user.is_superuser %}
                         <li class="nav-item">
