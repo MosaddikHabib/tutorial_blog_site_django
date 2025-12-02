@@ -1,0 +1,183 @@
+{% extends 'blog/admin_dashboard.html' %}
+
+{% block title %}Manage Users - Admin{% endblock %}
+
+{% block content %}
+<style>
+    @media (max-width: 767px) {
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+        .table thead {
+            display: none;
+        }
+        .table tbody tr {
+            display: block;
+            margin-bottom: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            background: white;
+        }
+        .table tbody td {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border: none;
+        }
+        .table tbody td:before {
+            content: attr(data-label);
+            font-weight: bold;
+            margin-right: 1rem;
+        }
+        .btn-group {
+            flex-direction: row !important;
+        }
+    }
+    @media (max-width: 575px) {
+        h2 {
+            font-size: 1.25rem;
+        }
+        .btn-primary {
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+        }
+    }
+</style>
+
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+    <h2 class="mb-0"><i class="fas fa-users me-2"></i>Manage Users</h2>
+    <a href="{% url 'admin_create_user' %}" class="btn btn-primary">
+        <i class="fas fa-user-plus me-1"></i>Create New User
+    </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-6 col-sm-12">
+                <label class="form-label">Search</label>
+                <input type="text" name="search" class="form-control" placeholder="Search by username, email, or name..." value="{{ search_query }}">
+            </div>
+            <div class="col-md-4 col-sm-6">
+                <label class="form-label">Role</label>
+                <select name="role" class="form-select">
+                    <option value="">All Roles</option>
+                    <option value="admin" {% if role_filter == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="user" {% if role_filter == 'user' %}selected{% endif %}>User</option>
+                </select>
+            </div>
+            <div class="col-md-2 col-sm-6 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-filter me-1"></i>Filter
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Users Table -->
+<div class="card">
+    <div class="card-body">
+        {% if users %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Role</th>
+                        <th>Posts</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user_item in users %}
+                    <tr>
+                        <td data-label="Username">
+                            <strong>{{ user_item.username }}</strong>
+                            {% if user_item.id == user.id %}<span class="badge bg-info ms-2">You</span>{% endif %}
+                        </td>
+                        <td data-label="Name">{{ user_item.get_full_name|default:"—" }}</td>
+                        <td data-label="Email">{{ user_item.email|default:"—" }}</td>
+                        <td data-label="Role">
+                            {% if user_item.is_superuser %}
+                                <span class="badge bg-danger">Admin</span>
+                            {% else %}
+                                <span class="badge bg-primary">User</span>
+                            {% endif %}
+                        </td>
+                        <td data-label="Posts">
+                            <span class="badge bg-secondary">{{ user_item.post_set.count }} post{{ user_item.post_set.count|pluralize }}</span>
+                        </td>
+                        <td data-label="Joined">{{ user_item.date_joined|date:"M d, Y" }}</td>
+                        <td data-label="Actions">
+                            <div class="btn-group btn-group-sm">
+                                <a href="{% url 'admin_edit_user' user_item.id %}" class="btn btn-outline-primary" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if user_item.id != user.id %}
+                                <a href="{% url 'admin_delete_user' user_item.id %}" class="btn btn-outline-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination -->
+        {% if users.has_other_pages %}
+        <nav aria-label="Page navigation" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if users.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ users.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </li>
+                {% endif %}
+                
+                {% for num in users.paginator.page_range %}
+                    {% if users.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
+                    </li>
+                    {% elif num > users.number|add:'-3' and num < users.number|add:'3' %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                            {{ num }}
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if users.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ users.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No users found</h5>
+            <p class="text-muted">Try adjusting your filters or create a new user.</p>
+            <a href="{% url 'admin_create_user' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-user-plus me-1"></i>Create First User
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

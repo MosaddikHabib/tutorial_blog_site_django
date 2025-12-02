@@ -132,12 +132,18 @@
 					</li>
 					<li class="nav-item mb-2">
 						<a class="nav-link sidebar-link" href="{% url 'admin_manage_posts' %}">
-							<i class="fas fa-list me-2"></i>All Posts
+							<i class="fas fa-list me-2"></i>My Posts
 						</a>
 					</li>
+					{% if user.is_superuser %}
 					<li class="nav-item mb-2">
 						<a class="nav-link sidebar-link" href="{% url 'admin_manage_categories' %}">
 							<i class="fas fa-tags me-2"></i>Categories
+						</a>
+					</li>
+					<li class="nav-item mb-2">
+						<a class="nav-link sidebar-link" href="{% url 'admin_manage_users' %}">
+							<i class="fas fa-users me-2"></i>Users
 						</a>
 					</li>
 					<li class="nav-item mb-2">
@@ -145,6 +151,7 @@
 							<i class="fas fa-cog me-2"></i>Django Admin
 						</a>
 					</li>
+					{% endif %}
 				</ul>
 			</nav>
 
@@ -196,18 +203,23 @@
 						<div class="card">
 							<div class="card-body">
 								<h5 class="card-title mb-3">Quick Actions</h5>
-								<a href="{% url 'admin_create_post' %}" class="btn btn-primary me-2">
+								<a href="{% url 'admin_create_post' %}" class="btn btn-primary me-2 mb-2">
 									<i class="fas fa-plus me-1"></i>Create New Post
 								</a>
-								<a href="{% url 'admin_manage_posts' %}" class="btn btn-outline-primary me-2">
-									<i class="fas fa-list me-1"></i>Manage Posts
+								<a href="{% url 'admin_manage_posts' %}" class="btn btn-outline-primary me-2 mb-2">
+									<i class="fas fa-list me-1"></i>My Posts
 								</a>
-								<a href="{% url 'admin_manage_categories' %}" class="btn btn-outline-secondary me-2">
+								{% if user.is_superuser %}
+								<a href="{% url 'admin_manage_categories' %}" class="btn btn-outline-secondary me-2 mb-2">
 									<i class="fas fa-tags me-1"></i>Manage Categories
 								</a>
-								<a href="/admin/" class="btn btn-outline-dark" target="_blank">
+								<a href="{% url 'admin_manage_users' %}" class="btn btn-outline-success me-2 mb-2">
+									<i class="fas fa-users me-1"></i>Manage Users
+								</a>
+								<a href="/admin/" class="btn btn-outline-dark mb-2" target="_blank">
 									<i class="fas fa-cog me-1"></i>Django Admin
 								</a>
+								{% endif %}
 							</div>
 						</div>
 					</div>

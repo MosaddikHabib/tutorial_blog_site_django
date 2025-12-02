@@ -7,6 +7,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.db.models import Q
+from django.contrib.auth.models import User
+from django.contrib.auth.hashers import make_password
 import json
 from .models import Post, Category, HomePageContent
 
@@ -327,8 +329,8 @@ def get_draft_posts(request):
 
 @login_required(login_url='custom_login')
 def admin_manage_posts(request):
-    """Custom admin page to manage all posts"""
-    if not request.user.is_superuser:
+    """Custom admin page to manage posts"""
+    if not request.user.is_staff:
         return redirect('post_list')
     
     # Filter and search functionality
@@ -336,7 +338,11 @@ def admin_manage_posts(request):
     category_filter = request.GET.get('category', '')
     search_query = request.GET.get('search', '')
     
-    posts = Post.objects.all().select_related('author', 'category')
+    # Superusers see all posts, regular users see only their own
+    if request.user.is_superuser:
+        posts = Post.objects.all().select_related('author', 'category')
+    else:
+        posts = Post.objects.filter(author=request.user).select_related('author', 'category')
     
     if status_filter:
         posts = posts.filter(status=status_filter)
@@ -456,4 +462,165 @@ def admin_delete_category(request, slug):
     context = {
         'category': category,
     }
+    return render(request, 'blog/admin_delete_category.html', context)
+
+
+@login_required(login_url='custom_login')
+def admin_manage_users(request):
+    """Custom admin page to manage all users"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    # Filter and search functionality
+    search_query = request.GET.get('search', '')
+    role_filter = request.GET.get('role', '')
+    
+    users = User.objects.all().order_by('-date_joined')
+    
+    if role_filter == 'admin':
+        users = users.filter(is_superuser=True)
+    elif role_filter == 'user':
+        users = users.filter(is_superuser=False)
+    
+    if search_query:
+        users = users.filter(
+            Q(username__icontains=search_query) | 
+            Q(email__icontains=search_query) |
+            Q(first_name__icontains=search_query) |
+            Q(last_name__icontains=search_query)
+        )
+    
+    # Pagination
+    paginator = Paginator(users, 20)
+    page_number = request.GET.get('page')
+    users = paginator.get_page(page_number)
+    
+    context = {
+        'users': users,
+        'search_query': search_query,
+        'role_filter': role_filter,
+    }
+    return render(request, 'blog/admin_manage_users.html', context)
+
+
+@login_required(login_url='custom_login')
+def admin_create_user(request):
+    """Create a new user"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        password = request.POST.get('password', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        is_superuser = request.POST.get('is_superuser') == 'on'
+        
+        # Validation
+        if not username or not password:
+            messages.error(request, 'Username and password are required!')
+            return redirect('admin_create_user')
+        
+        if User.objects.filter(username=username).exists():
+            messages.error(request, f'Username "{username}" already exists!')
+            return redirect('admin_create_user')
+        
+        if email and User.objects.filter(email=email).exists():
+            messages.error(request, f'Email "{email}" is already registered!')
+            return redirect('admin_create_user')
+        
+        # Create user
+        user = User.objects.create(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            is_superuser=is_superuser,
+            is_staff=is_superuser,  # Staff status matches superuser
+            password=make_password(password)
+        )
+        
+        role = "Admin" if is_superuser else "User"
+        messages.success(request, f'{role} "{username}" created successfully!')
+        return redirect('admin_manage_users')
+    
+    return render(request, 'blog/admin_create_user.html')
+
+
+@login_required(login_url='custom_login')
+def admin_edit_user(request, user_id):
+    """Edit a user"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    user = get_object_or_404(User, id=user_id)
+    
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        is_superuser = request.POST.get('is_superuser') == 'on'
+        new_password = request.POST.get('new_password', '').strip()
+        
+        if not username:
+            messages.error(request, 'Username is required!')
+            return redirect('admin_edit_user', user_id=user_id)
+        
+        # Check username uniqueness
+        if User.objects.filter(username=username).exclude(id=user_id).exists():
+            messages.error(request, f'Username "{username}" already exists!')
+            return redirect('admin_edit_user', user_id=user_id)
+        
+        # Check email uniqueness
+        if email and User.objects.filter(email=email).exclude(id=user_id).exists():
+            messages.error(request, f'Email "{email}" is already registered!')
+            return redirect('admin_edit_user', user_id=user_id)
+        
+        # Update user
+        user.username = username
+        user.email = email
+        user.first_name = first_name
+        user.last_name = last_name
+        user.is_superuser = is_superuser
+        user.is_staff = is_superuser
+        
+        # Update password if provided
+        if new_password:
+            user.password = make_password(new_password)
+        
+        user.save()
+        messages.success(request, f'User "{username}" updated successfully!')
+        return redirect('admin_manage_users')
+    
+    context = {
+        'edited_user': user,
+    }
+    return render(request, 'blog/admin_edit_user.html', context)
+
+
+@login_required(login_url='custom_login')
+def admin_delete_user(request, user_id):
+    """Delete a user"""
+    if not request.user.is_superuser:
+        return redirect('post_list')
+    
+    user = get_object_or_404(User, id=user_id)
+    
+    # Prevent deleting yourself
+    if user.id == request.user.id:
+        messages.error(request, 'You cannot delete your own account!')
+        return redirect('admin_manage_users')
+    
+    if request.method == 'POST':
+        username = user.username
+        user.delete()
+        messages.success(request, f'User "{username}" deleted successfully!')
+        return redirect('admin_manage_users')
+    
+    context = {
+        'deleted_user': user,
+    }
+    return render(request, 'blog/admin_delete_user.html', context)
     return render(request, 'blog/admin_delete_category.html', context)

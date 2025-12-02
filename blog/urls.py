@@ -21,6 +21,12 @@ urlpatterns = [
     path('manage/category/edit/<slug:slug>/', views.admin_edit_category, name='admin_edit_category'),
     path('manage/category/delete/<slug:slug>/', views.admin_delete_category, name='admin_delete_category'),
     
+    # User Management URLs (Admin only)
+    path('manage/users/', views.admin_manage_users, name='admin_manage_users'),
+    path('manage/users/create/', views.admin_create_user, name='admin_create_user'),
+    path('manage/users/edit/<int:user_id>/', views.admin_edit_user, name='admin_edit_user'),
+    path('manage/users/delete/<int:user_id>/', views.admin_delete_user, name='admin_delete_user'),
+    
     # Auto-save draft functionality
     path('api/auto-save-draft/', views.auto_save_draft, name='auto_save_draft'),
     path('api/get-drafts/', views.get_draft_posts, name='get_draft_posts'),
