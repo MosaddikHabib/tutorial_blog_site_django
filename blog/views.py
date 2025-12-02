@@ -177,7 +177,7 @@ def admin_create_post(request):
             )
             
             messages.success(request, 'Post published successfully!')
-            return redirect('admin_dashboard')
+            return redirect('post_detail', slug=post.slug)
         except Exception as e:
             messages.error(request, f'Error creating post: {str(e)}')
     
