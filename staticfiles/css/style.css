@@ -165,32 +165,64 @@ a {
 
 /* Pagination */
 .pagination .page-link {
-    border-radius: 8px;
+    border-radius: 8px !important;
     margin: 0 4px;
     font-weight: 500;
-    color: var(--primary-color);
-    border: 2px solid var(--border-color);
-    background-color: var(--card-bg);
+    color: var(--primary-color) !important;
+    border: 2px solid var(--border-color) !important;
+    background-color: var(--card-bg) !important;
     transition: all 0.3s ease;
 }
 
 .pagination .page-link:hover {
-    background: var(--primary-color);
+    background: var(--primary-color) !important;
     color: #fff !important;
-    border-color: var(--primary-color);
+    border-color: var(--primary-color) !important;
+}
+
+.pagination .page-link:focus {
+    background: var(--primary-color) !important;
+    color: #fff !important;
+    border-color: var(--primary-color) !important;
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.25) !important;
 }
 
 .pagination .page-item.active .page-link {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-    border-color: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%) !important;
+    border-color: var(--primary-color) !important;
     color: #fff !important;
 }
 
 .pagination .page-item.disabled .page-link {
-    color: var(--text-color);
-    background-color: var(--card-bg);
-    border-color: var(--border-color);
+    color: var(--text-color) !important;
+    background-color: var(--card-bg) !important;
+    border-color: var(--border-color) !important;
     opacity: 0.6;
+}
+
+/* Dark mode specific pagination overrides */
+[data-theme="dark"] .pagination .page-link {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #60a5fa !important;
+}
+
+[data-theme="dark"] .pagination .page-link:hover {
+    background-color: #60a5fa !important;
+    border-color: #60a5fa !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pagination .page-item.active .page-link {
+    background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%) !important;
+    border-color: #60a5fa !important;
+    color: #ffffff !important;
+}
+
+[data-theme="dark"] .pagination .page-item.disabled .page-link {
+    background-color: #1f2937 !important;
+    border-color: #374151 !important;
+    color: #9ca3af !important;
 }
 
 /* Post detail layout */
