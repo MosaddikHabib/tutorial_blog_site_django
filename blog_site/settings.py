@@ -32,15 +32,14 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
-    'jazzmin',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 'ckeditor',
-    # 'ckeditor_uploader',
+    'ckeditor',
+    'ckeditor_uploader',
     
     'blog',  # Our blog app
 ]
@@ -183,3 +182,7 @@ CKEDITOR_CONFIGS = {
         ]),
     },
 }
+
+# File Upload Settings - Increase limits for larger images/videos
+DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
+FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
