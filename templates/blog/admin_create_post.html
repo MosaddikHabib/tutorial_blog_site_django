@@ -247,6 +247,69 @@
             }
         }
         
+        /* Sidebar Layout */
+        .editor-layout {
+            display: flex;
+            gap: 1.5rem;
+            min-height: calc(100vh - 180px);
+        }
+        
+        .sidebar-controls {
+            width: 320px;
+            flex-shrink: 0;
+        }
+        
+        .sidebar-controls .card {
+            position: sticky;
+            top: 20px;
+        }
+        
+        .editor-main {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .sidebar-section {
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .sidebar-section:last-child {
+            border-bottom: none;
+        }
+        
+        .sidebar-section h6 {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary-color);
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+        
+        #editor {
+            height: calc(100vh - 200px);
+            min-height: 500px;
+        }
+        
+        @media (max-width: 991px) {
+            .editor-layout {
+                flex-direction: column;
+            }
+            
+            .sidebar-controls {
+                width: 100%;
+            }
+            
+            .sidebar-controls .card {
+                position: static;
+            }
+            
+            #editor {
+                height: 500px;
+            }
+        }
+        
         @media (max-width: 575px) {
             .navbar-brand {
                 font-size: 1rem;
@@ -284,70 +347,98 @@
         </div>
     </nav>
 
-    <div class="container my-5">
-        <div class="row justify-content-center">
-            <div class="col-lg-10">
-                <div class="card shadow">
-                    <div class="card-body p-4">
-                        <h3 class="mb-4">Create New Post</h3>
-                        
-                        <form method="POST" enctype="multipart/form-data" id="postForm">
-                            {% csrf_token %}
+    <div class="container-fluid px-4 my-4">
+        <form method="POST" enctype="multipart/form-data" id="postForm">
+            {% csrf_token %}
+            
+            <div class="editor-layout">
+                <!-- Left Sidebar Controls -->
+                <div class="sidebar-controls">
+                    <div class="card">
+                        <div class="card-body p-3">
+                            <!-- Post Details Section -->
+                            <div class="sidebar-section">
+                                <h6><i class="fas fa-file-alt me-2"></i>Post Details</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="title" class="form-label small">Title</label>
+                                    <input type="text" class="form-control form-control-sm" id="title" name="title" placeholder="Enter post title..." required>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="category" class="form-label small">Category</label>
+                                    <select class="form-select form-select-sm" id="category" name="category" required>
+                                        <option value="">Select category</option>
+                                        {% for category in categories %}
+                                        <option value="{{ category.id }}">{{ category.name }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
                             
-                            <!-- Title -->
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Title</label>
-                                <input type="text" class="form-control form-control-lg" id="title" name="title" required>
+                            <!-- Media Section -->
+                            <div class="sidebar-section">
+                                <h6><i class="fas fa-image me-2"></i>Featured Image</h6>
+                                
+                                <div class="mb-3">
+                                    <label for="featured_image" class="form-label small">Upload Image</label>
+                                    <input type="file" class="form-control form-control-sm" id="featured_image" name="featured_image" accept="image/*">
+                                    <small class="text-muted">Recommended: 1200x630px</small>
+                                </div>
                             </div>
-
-                            <!-- Category -->
-                            <div class="mb-3">
-                                <label for="category" class="form-label">Category</label>
-                                <select class="form-select" id="category" name="category" required>
-                                    <option value="">Select a category</option>
-                                    {% for category in categories %}
-                                    <option value="{{ category.id }}">{{ category.name }}</option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-
-                            <!-- Content -->
-                            <div class="mb-3">
-                                <label for="content" class="form-label">Content</label>
-                                <div id="editor"></div>
-                                <textarea name="content" id="content" style="display:none;"></textarea>
-                            </div>
-
-                            <!-- Title Image -->
-                            <div class="mb-3">
-                                <label for="featured_image" class="form-label">Title Image</label>
-                                <input type="file" class="form-control" id="featured_image" name="featured_image" accept="image/*">
-                            </div>
-
-                            <!-- Publish Button -->
-                            <div class="mb-4">
-                                <button type="submit" class="btn btn-success btn-lg">
-                                    <i class="fas fa-upload me-2"></i>Publish Post
+                            
+                            <!-- Publish Section -->
+                            <div class="sidebar-section">
+                                <h6><i class="fas fa-rocket me-2"></i>Publish</h6>
+                                
+                                <button type="submit" class="btn btn-success w-100 mb-2">
+                                    <i class="fas fa-check-circle me-2"></i>Publish Post
                                 </button>
-                                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary btn-lg ms-2">Cancel</a>
+                                
+                                <a href="{% url 'admin_dashboard' %}" class="btn btn-outline-secondary w-100 btn-sm">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </a>
+                                
                                 <div class="mt-2">
                                     <small id="autoSaveStatus" class="text-muted">Auto-save: Ready</small>
                                 </div>
                             </div>
-                        </form>
+                            
+                            <!-- Help Section -->
+                            <div class="sidebar-section">
+                                <h6><i class="fas fa-lightbulb me-2"></i>Quick Tips</h6>
+                                <ul class="small mb-0 ps-3">
+                                    <li>Write clear title</li>
+                                    <li>Use formatting tools</li>
+                                    <li>Add images inline</li>
+                                </ul>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                <!-- Help Section -->
-                <div class="card shadow mt-4">
-                    <div class="card-body">
-                        <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Tips for Creating Posts</h5>
-                        <ul class="mb-0">
-                            <li>Write a clear and descriptive title</li>
-                            <li>Add an excerpt to provide a preview of your post</li>
-                            <li>Use the content field for your main post content</li>
-                            <li>Upload a featured image to make your post more attractive</li>
-                            <li>Add YouTube videos by pasting the URL</li>
+                
+                <!-- Main Editor Area -->
+                <div class="editor-main">
+                    <div class="card">
+                        <div class="card-body p-0">
+                            <div id="editor"></div>
+                            <textarea name="content" id="content" style="display:none;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+        
+        <!-- Bottom Help Section for Mobile -->
+        <div class="card shadow mt-4 d-lg-none">
+            <div class="card-body">
+                <h5 class="card-title"><i class="fas fa-info-circle me-2"></i>Tips for Creating Posts</h5>
+                <ul class="mb-0">
+                    <li>Write a clear and descriptive title</li>
+                    <li>Add an excerpt to provide a preview of your post</li>
+                    <li>Use the content field for your main post content</li>
+                    <li>Upload a featured image to make your post more attractive</li>
+                    <li>Add YouTube videos by pasting the URL</li>
                             <li>Save as "Draft" to work on it later, or "Published" to make it visible immediately</li>
                         </ul>
                     </div>
