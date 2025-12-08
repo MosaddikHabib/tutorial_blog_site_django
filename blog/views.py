@@ -121,18 +121,48 @@ def admin_dashboard(request):
     if not request.user.is_superuser:
         return redirect('user_dashboard')
     
-    posts = Post.objects.filter(author=request.user).order_by('-created_at')[:10]
+    # Get all staff users for the filter dropdown
+    all_users = User.objects.filter(is_staff=True).order_by('username')
+    selected_user_id = request.GET.get('user', '')
+    selected_user = None
+    
+    # Filter posts based on selected user
+    if selected_user_id:
+        try:
+            selected_user = User.objects.get(id=selected_user_id)
+            posts = Post.objects.filter(author__id=selected_user_id).select_related('author', 'category').order_by('-created_at')[:10]
+            # Stats for selected user
+            stats = {
+                'total_posts': Post.objects.filter(author__id=selected_user_id).count(),
+                'published_posts': Post.objects.filter(author__id=selected_user_id, status='published').count(),
+                'draft_posts': Post.objects.filter(author__id=selected_user_id, status='draft').count(),
+            }
+        except User.DoesNotExist:
+            selected_user = None
+            posts = Post.objects.all().select_related('author', 'category').order_by('-created_at')[:10]
+            stats = {
+                'total_posts': Post.objects.count(),
+                'published_posts': Post.objects.filter(status='published').count(),
+                'draft_posts': Post.objects.filter(status='draft').count(),
+            }
+    else:
+        # Show all posts when no specific user is selected
+        posts = Post.objects.all().select_related('author', 'category').order_by('-created_at')[:10]
+        stats = {
+            'total_posts': Post.objects.count(),
+            'published_posts': Post.objects.filter(status='published').count(),
+            'draft_posts': Post.objects.filter(status='draft').count(),
+        }
+    
     categories = Category.objects.all()
-    stats = {
-        'total_posts': Post.objects.filter(author=request.user).count(),
-        'published_posts': Post.objects.filter(author=request.user, status='published').count(),
-        'draft_posts': Post.objects.filter(author=request.user, status='draft').count(),
-    }
     
     context = {
         'posts': posts,
         'categories': categories,
         'stats': stats,
+        'all_users': all_users,
+        'selected_user_id': selected_user_id,
+        'selected_user': selected_user,
     }
     return render(request, 'blog/admin_dashboard.html', context)
 
