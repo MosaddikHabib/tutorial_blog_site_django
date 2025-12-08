@@ -83,15 +83,23 @@ def admin_view_trashed_post(request, slug):
 
 def post_detail(request, slug):
     """Display individual post detail"""
-    post = get_object_or_404(Post, slug=slug, status='published')
+    # Only show non-trashed posts on the public endpoint; staff can view drafts but not trashed items
+    if request.user.is_authenticated and request.user.is_staff:
+        post = get_object_or_404(Post, slug=slug, is_trashed=False)
+    else:
+        post = get_object_or_404(Post, slug=slug, status='published', is_trashed=False)
+    
     related_posts = Post.objects.filter(
         category=post.category, 
         status='published'
     ).exclude(id=post.id)[:3]
+
+    categories = Category.objects.all()
     
     context = {
         'post': post,
         'related_posts': related_posts,
+        'categories': categories,
     }
     return render(request, 'blog/post_detail.html', context)
 
@@ -100,8 +108,9 @@ def category_posts(request, slug):
     """Display posts filtered by category"""
     category = get_object_or_404(Category, slug=slug)
     posts = Post.objects.filter(
-        category=category, 
-        status='published'
+        category=category,
+        status='published',
+        is_trashed=False
     ).select_related('author', 'category')
     categories = Category.objects.all()
     
@@ -136,10 +145,13 @@ def user_dashboard(request):
         'published_posts': Post.objects.filter(author=request.user, status='published').count(),
         'draft_posts': Post.objects.filter(author=request.user, status='draft').count(),
     }
+
+    categories = Category.objects.all()
     
     context = {
         'posts': posts,
         'stats': stats,
+        'categories': categories,
     }
     return render(request, 'blog/user_dashboard.html', context)
 
@@ -264,7 +276,12 @@ def admin_edit_post(request, slug):
     if not request.user.is_staff:
         return redirect('post_list')
     
-    post = get_object_or_404(Post, slug=slug, author=request.user)
+    # Superusers can edit any post, regular staff can only edit their own
+    if request.user.is_superuser:
+        post = get_object_or_404(Post, slug=slug, is_trashed=False)
+    else:
+        post = get_object_or_404(Post, slug=slug, author=request.user, is_trashed=False)
+    
     categories = Category.objects.all()
     
     if request.method == 'POST':

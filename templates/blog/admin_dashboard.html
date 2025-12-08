@@ -390,11 +390,11 @@
 											<td>{{ posts.start_index|add:forloop.counter0 }}</td>
 											<td>{{ post.title }}</td>
 											<td>
-												<span class="badge bg-info">
+												<span class="badge badge-user">
 													<i class="fas fa-user me-1"></i>{{ post.author.username }}
 												</span>
 											</td>
-											<td><span class="badge bg-secondary">{{ post.category.name }}</span></td>
+											<td><span class="badge badge-category">{{ post.category.name }}</span></td>
 											<td>
 												{% if post.status == 'published' %}
 													<span class="badge bg-success">Published</span>
@@ -432,17 +432,17 @@
 							{% if posts.has_other_pages %}
 							<nav aria-label="Posts pagination" class="mt-4">
 								<ul class="pagination justify-content-center">
-									{% if posts.has_previous %}
-										<li class="page-item">
-											<a class="page-link" href="?page=1{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="First">
-												<span aria-hidden="true">&laquo;&laquo;</span>
-											</a>
-										</li>
-										<li class="page-item">
-											<a class="page-link" href="?page={{ posts.previous_page_number }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="Previous">
-												<span aria-hidden="true">&laquo;</span>
-											</a>
-										</li>
+								{% if posts.has_previous %}
+									<li class="page-item">
+										<a class="page-link" href="?page=1{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" aria-label="First">
+											<span aria-hidden="true">&laquo;&laquo;</span>
+										</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="?page={{ posts.previous_page_number }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" aria-label="Previous">
+											<span aria-hidden="true">&laquo;</span>
+										</a>
+									</li>
 									{% else %}
 										<li class="page-item disabled">
 											<span class="page-link">&laquo;&laquo;</span>
@@ -452,25 +452,23 @@
 										</li>
 									{% endif %}
 									
-									{% for num in posts.paginator.page_range %}
-										{% if posts.number == num %}
-											<li class="page-item active"><span class="page-link">{{ num }}</span></li>
-										{% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
-											<li class="page-item"><a class="page-link" href="?page={{ num }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}">{{ num }}</a></li>
-										{% endif %}
-									{% endfor %}
-									
-									{% if posts.has_next %}
-										<li class="page-item">
-											<a class="page-link" href="?page={{ posts.next_page_number }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="Next">
-												<span aria-hidden="true">&raquo;</span>
-											</a>
-										</li>
-										<li class="page-item">
-											<a class="page-link" href="?page={{ posts.paginator.num_pages }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="Last">
-												<span aria-hidden="true">&raquo;&raquo;</span>
-											</a>
-										</li>
+								{% for num in posts.paginator.page_range %}
+									{% if posts.number == num %}
+										<li class="page-item active"><span class="page-link">{{ num }}</span></li>
+									{% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+										<li class="page-item"><a class="page-link" href="?page={{ num }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}">{{ num }}</a></li>
+									{% endif %}
+								{% endfor %}								{% if posts.has_next %}
+									<li class="page-item">
+										<a class="page-link" href="?page={{ posts.next_page_number }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" aria-label="Next">
+											<span aria-hidden="true">&raquo;</span>
+										</a>
+									</li>
+									<li class="page-item">
+										<a class="page-link" href="?page={{ posts.paginator.num_pages }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}" aria-label="Last">
+											<span aria-hidden="true">&raquo;&raquo;</span>
+										</a>
+									</li>
 									{% else %}
 										<li class="page-item disabled">
 											<span class="page-link">&raquo;</span>
