@@ -10,8 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <!-- Quill Rich Text Editor -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+    <!-- CKEditor CSS -->
+    <link rel="stylesheet" href="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.css">
     <style>
         :root {
             --primary-color: #3b82f6;
@@ -65,20 +65,24 @@
         }
         
         #editor { 
-            height: 400px;
             border-radius: 8px;
             border: 2px solid var(--border-color);
             background-color: var(--card-bg);
         }
         
-        .ql-editor { 
+        .ck-editor__main {
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .ck-editor__editable {
+            min-height: 400px;
             font-size: 16px; 
             line-height: 1.6;
             background-color: var(--card-bg);
             color: var(--text-color);
         }
         
-        .ql-toolbar {
+        .ck-toolbar {
             border-top: 2px solid var(--border-color);
             border-left: 2px solid var(--border-color);
             border-right: 2px solid var(--border-color);
@@ -87,16 +91,18 @@
             background: var(--card-bg);
         }
         
-        [data-theme="dark"] .ql-toolbar {
+        [data-theme="dark"] .ck-toolbar {
             background: var(--card-bg);
+            border-color: var(--border-color);
         }
         
-        [data-theme="dark"] .ql-stroke {
-            stroke: var(--text-color);
+        [data-theme="dark"] .ck-toolbar .ck-button {
+            color: var(--text-color);
         }
         
-        [data-theme="dark"] .ql-fill {
-            fill: var(--text-color);
+        [data-theme="dark"] .ck-editor__editable {
+            background-color: var(--card-bg);
+            color: var(--text-color);
         }
         
         [data-theme="dark"] .ql-picker-label {
@@ -454,121 +460,135 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Quill Rich Text Editor -->
-    <script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
-    
-    <!-- Quill Table Module -->
-    <script src="https://cdn.jsdelivr.net/npm/quill-table@1.0.0/dist/quill-table.min.js"></script>
-    <link href="https://cdn.jsdelivr.net/npm/quill-table@1.0.0/dist/quill-table.min.css" rel="stylesheet">
-    
+    <!-- CKEditor 5 -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.umd.js"></script>
     <script>
-        // Register table module
-        Quill.register('modules/table', window.QuillTable.TableModule);
+        // Initialize CKEditor with table support
+        let editor;
         
-        // Initialize Quill editor with table support
-        var quill = new Quill('#editor', {
-            theme: 'snow',
-            modules: {
-                table: true,
+        const {
+            ClassicEditor,
+            Essentials,
+            Bold,
+            Italic,
+            Font,
+            Paragraph,
+            Table,
+            TableToolbar,
+            TableProperties,
+            TableCellProperties,
+            Heading,
+            List,
+            Link,
+            Image,
+            ImageCaption,
+            ImageStyle,
+            ImageToolbar,
+            ImageUpload,
+            Alignment,
+            BlockQuote,
+            CodeBlock,
+            Underline,
+            Strikethrough,
+            CKFinderUploadAdapter,
+            CKFinder,
+            MediaEmbed,
+            SourceEditing,
+            RemoveFormat
+        } = window.CKEDITOR;
+
+        ClassicEditor
+            .create(document.querySelector('#editor'), {
+                plugins: [
+                    Essentials,
+                    Bold,
+                    Italic,
+                    Font,
+                    Paragraph,
+                    Heading,
+                    List,
+                    Link,
+                    Image,
+                    ImageCaption,
+                    ImageStyle,
+                    ImageToolbar,
+                    ImageUpload,
+                    Table,
+                    TableToolbar,
+                    TableProperties,
+                    TableCellProperties,
+                    Alignment,
+                    BlockQuote,
+                    CodeBlock,
+                    Underline,
+                    Strikethrough,
+                    MediaEmbed,
+                    SourceEditing,
+                    RemoveFormat
+                ],
                 toolbar: [
-                    [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                    ['bold', 'italic', 'underline', 'strike'],
-                    [{ 'color': [] }, { 'background': [] }],
-                    [{ 'font': [] }],
-                    [{ 'size': ['small', false, 'large', 'huge'] }],
-                    [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                    [{ 'indent': '-1'}, { 'indent': '+1' }],
-                    [{ 'align': [] }],
-                    ['blockquote', 'code-block'],
-                    ['link', 'image', 'video'],
-                    ['clean']
-                ]
-            }
-        });
-        
-        // Add custom table button to toolbar
-        const toolbar = quill.getModule('toolbar');
-        const tableButton = document.querySelector('.ql-toolbar');
-        
-        // Create table button group
-        const tableGroup = document.createElement('span');
-        tableGroup.className = 'ql-formats';
-        tableGroup.innerHTML = `
-            <button class="ql-table-insert" title="Insert Table">
-                <i class="fas fa-table"></i>
-            </button>
-            <button class="ql-table-delete" title="Delete Table">
-                <i class="fas fa-trash"></i>
-            </button>
-        `;
-        tableButton.appendChild(tableGroup);
-        
-        // Table insert handler
-        document.querySelector('.ql-table-insert').addEventListener('click', function(e) {
-            e.preventDefault();
-            const rows = prompt('Enter number of rows:', '3');
-            const cols = prompt('Enter number of columns:', '3');
-            
-            if (rows && cols) {
-                insertTable(parseInt(rows), parseInt(cols));
-            }
-        });
-        
-        // Table delete handler
-        document.querySelector('.ql-table-delete').addEventListener('click', function(e) {
-            e.preventDefault();
-            const range = quill.getSelection();
-            if (range) {
-                const [line] = quill.getLine(range.index);
-                if (line && line.domNode) {
-                    const table = line.domNode.closest('table');
-                    if (table) {
-                        const tableBlot = Quill.find(table);
-                        if (tableBlot) {
-                            tableBlot.remove();
+                    'heading',
+                    '|',
+                    'bold',
+                    'italic',
+                    'underline',
+                    'strikethrough',
+                    'removeFormat',
+                    '|',
+                    'fontSize',
+                    'fontFamily',
+                    'fontColor',
+                    'fontBackgroundColor',
+                    '|',
+                    'alignment',
+                    '|',
+                    'numberedList',
+                    'bulletedList',
+                    'blockQuote',
+                    'codeBlock',
+                    '|',
+                    'link',
+                    'imageUpload',
+                    'mediaEmbed',
+                    'insertTable',
+                    '|',
+                    'sourceEditing'
+                ],
+                table: {
+                    contentToolbar: ['tableColumn', 'tableRow', 'mergeTableCells', 'tableProperties', 'tableCellProperties']
+                },
+                image: {
+                    resizeOptions: [
+                        {
+                            name: 'imageResizePercentages',
+                            label: 'Resize image',
+                            values: [ '25', '50', '75', '100' ]
+                        },
+                        {
+                            name: 'imageResizeCustom',
+                            label: 'Custom size',
+                            value: null
                         }
-                    }
+                    ],
+                    styles: [
+                        'alignCenter',
+                        'alignLeft',
+                        'alignRight'
+                    ],
+                    toolbar: ['imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', '|', 'imageTextAlternative']
                 }
-            }
-        });
-        
-        // Function to insert table
-        function insertTable(rows, cols) {
-            const range = quill.getSelection(true);
-            if (!range) return;
-            
-            let tableHTML = '<table class="table table-bordered"><tbody>';
-            for (let i = 0; i < rows; i++) {
-                tableHTML += '<tr>';
-                for (let j = 0; j < cols; j++) {
-                    tableHTML += '<td><br></td>';
-                }
-                tableHTML += '</tr>';
-            }
-            tableHTML += '</tbody></table><p><br></p>';
-            
-            const delta = quill.clipboard.convert(tableHTML);
-            quill.setContents(quill.getContents().concat(delta), 'user');
-            quill.setSelection(range.index + 1, 0);
-        }
-
-        // Set the existing content in the editor
-        var existingContent = document.getElementById('content').value;
-        if (existingContent) {
-            var tempDiv = document.createElement('div');
-            tempDiv.innerHTML = existingContent;
-            
-            if (existingContent.includes('<') && existingContent.includes('>')) {
-                quill.root.innerHTML = existingContent;
-            } else {
-                quill.setText(existingContent);
-            }
-        }
-
-        // Before form submission, copy Quill content to hidden textarea
-        document.getElementById('editForm').addEventListener('submit', function() {
-            document.getElementById('content').value = quill.root.innerHTML;
-        });
+            })
+            .then(newEditor => {
+                editor = newEditor;
+                
+                // Sync CKEditor content to hidden textarea on form submission
+                document.getElementById('editPostForm').addEventListener('submit', function() {
+                    document.getElementById('content').value = editor.getData();
+                });
+            })
+            .catch(error => {
+                console.error('Error initializing CKEditor:', error);
+            });
 
         // Theme Toggle Functionality
         function toggleTheme() {
