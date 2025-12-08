@@ -206,8 +206,8 @@ def admin_create_post(request):
                 featured_image=featured_image,
             )
             
-            messages.success(request, 'Post published successfully!')
-            return redirect('post_detail', slug=post.slug)
+            messages.success(request, f'Post "{post.title}" published successfully!')
+            return redirect('admin_dashboard')
         except Exception as e:
             messages.error(request, f'Error creating post: {str(e)}')
     
@@ -248,8 +248,8 @@ def admin_edit_post(request, slug):
         try:
             post.category = Category.objects.get(id=category_id)
             post.save()
-            messages.success(request, 'Post updated successfully!')
-            return redirect('admin_edit_post', slug=post.slug)
+            messages.success(request, f'Post "{post.title}" updated successfully!')
+            return redirect('admin_dashboard')
         except Exception as e:
             messages.error(request, f'Error updating post: {str(e)}')
     
