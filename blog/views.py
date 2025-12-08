@@ -25,13 +25,14 @@ def post_list(request):
             Q(title__icontains=search_query) | 
             Q(content__icontains=search_query) | 
             Q(excerpt__icontains=search_query),
-            status='published'
+            status='published',
+            is_trashed=False
         ).select_related('author', 'category')
     else:
-        posts = Post.objects.filter(status='published').select_related('author', 'category')
+        posts = Post.objects.filter(status='published', is_trashed=False).select_related('author', 'category')
     
     # Get recent posts for summary cards
-    recent_posts = Post.objects.filter(status='published').select_related('author', 'category')[:6]
+    recent_posts = Post.objects.filter(status='published', is_trashed=False).select_related('author', 'category')[:6]
     
     # Pagination
     paginator = Paginator(posts, 9)
@@ -46,6 +47,26 @@ def post_list(request):
         'search_query': search_query,
     }
     return render(request, 'blog/post_list.html', context)
+
+
+@login_required
+def admin_view_trashed_post(request, slug):
+    """View a trashed post"""
+    if not request.user.is_staff:
+        return redirect('post_list')
+    
+    post = get_object_or_404(Post, slug=slug, is_trashed=True)
+    
+    # Only superuser or post author can view trashed posts
+    if not request.user.is_superuser and post.author != request.user:
+        messages.error(request, 'You do not have permission to view this post.')
+        return redirect('admin_trash')
+    
+    context = {
+        'post': post,
+        'is_trashed': True,
+    }
+    return render(request, 'blog/admin_view_trashed_post.html', context)
 
 
 def post_detail(request, slug):
@@ -126,33 +147,41 @@ def admin_dashboard(request):
     selected_user_id = request.GET.get('user', '')
     selected_user = None
     
-    # Filter posts based on selected user
+    # Filter posts based on selected user (exclude trashed)
     if selected_user_id:
         try:
             selected_user = User.objects.get(id=selected_user_id)
-            posts = Post.objects.filter(author__id=selected_user_id).select_related('author', 'category').order_by('-created_at')[:10]
+            posts = Post.objects.filter(author__id=selected_user_id, is_trashed=False).select_related('author', 'category').order_by('-created_at')
             # Stats for selected user
             stats = {
-                'total_posts': Post.objects.filter(author__id=selected_user_id).count(),
-                'published_posts': Post.objects.filter(author__id=selected_user_id, status='published').count(),
-                'draft_posts': Post.objects.filter(author__id=selected_user_id, status='draft').count(),
+                'total_posts': Post.objects.filter(author__id=selected_user_id, is_trashed=False).count(),
+                'published_posts': Post.objects.filter(author__id=selected_user_id, status='published', is_trashed=False).count(),
+                'draft_posts': Post.objects.filter(author__id=selected_user_id, status='draft', is_trashed=False).count(),
+                'trashed_posts': Post.objects.filter(is_trashed=True).count(),
             }
         except User.DoesNotExist:
             selected_user = None
-            posts = Post.objects.all().select_related('author', 'category').order_by('-created_at')[:10]
+            posts = Post.objects.filter(is_trashed=False).select_related('author', 'category').order_by('-created_at')
             stats = {
-                'total_posts': Post.objects.count(),
-                'published_posts': Post.objects.filter(status='published').count(),
-                'draft_posts': Post.objects.filter(status='draft').count(),
+                'total_posts': Post.objects.filter(is_trashed=False).count(),
+                'published_posts': Post.objects.filter(status='published', is_trashed=False).count(),
+                'draft_posts': Post.objects.filter(status='draft', is_trashed=False).count(),
+                'trashed_posts': Post.objects.filter(is_trashed=True).count(),
             }
     else:
-        # Show all posts when no specific user is selected
-        posts = Post.objects.all().select_related('author', 'category').order_by('-created_at')[:10]
+        # Show all posts when no specific user is selected (exclude trashed)
+        posts = Post.objects.filter(is_trashed=False).select_related('author', 'category').order_by('-created_at')
         stats = {
-            'total_posts': Post.objects.count(),
-            'published_posts': Post.objects.filter(status='published').count(),
-            'draft_posts': Post.objects.filter(status='draft').count(),
+            'total_posts': Post.objects.filter(is_trashed=False).count(),
+            'published_posts': Post.objects.filter(status='published', is_trashed=False).count(),
+            'draft_posts': Post.objects.filter(status='draft', is_trashed=False).count(),
+            'trashed_posts': Post.objects.filter(is_trashed=True).count(),
         }
+    
+    # Pagination - 15 posts per page
+    paginator = Paginator(posts, 15)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
     
     categories = Category.objects.all()
     
@@ -262,15 +291,24 @@ def admin_edit_post(request, slug):
 
 @login_required(login_url='custom_login')
 def admin_delete_post(request, slug):
-    """Delete post"""
+    """Move post to trash instead of deleting"""
     if not request.user.is_staff:
         return redirect('post_list')
     
-    post = get_object_or_404(Post, slug=slug, author=request.user)
+    post = get_object_or_404(Post, slug=slug)
+    
+    # Only superuser or post author can trash
+    if not request.user.is_superuser and post.author != request.user:
+        messages.error(request, 'You do not have permission to delete this post.')
+        return redirect('admin_dashboard')
     
     if request.method == 'POST':
-        post.delete()
-        messages.success(request, 'Post deleted successfully!')
+        from django.utils import timezone
+        post.is_trashed = True
+        post.trashed_at = timezone.now()
+        post.trashed_by = request.user
+        post.save()
+        messages.success(request, f'Post "{post.title}" moved to trash!')
         return redirect('admin_dashboard')
     
     context = {
@@ -682,4 +720,184 @@ def admin_delete_user(request, user_id):
         'deleted_user': user,
     }
     return render(request, 'blog/admin_delete_user.html', context)
-    return render(request, 'blog/admin_delete_category.html', context)
+
+
+@login_required
+@require_POST
+@csrf_exempt
+def ckeditor_upload_image(request):
+    """Handle image uploads from CKEditor using SimpleUploadAdapter"""
+    if not request.user.is_staff:
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    try:
+        uploaded_file = request.FILES.get('upload')
+        if not uploaded_file:
+            return JsonResponse({
+                'uploaded': False,
+                'error': {'message': 'No file provided'}
+            }, status=400)
+        
+        from django.core.files.storage import default_storage
+        
+        # Save file to media directory
+        filename = default_storage.save(f'ckeditor_uploads/{uploaded_file.name}', uploaded_file)
+        url = default_storage.url(filename)
+        
+        # Return in the format CKEditor SimpleUploadAdapter expects
+        return JsonResponse({
+            'url': url
+        })
+    except Exception as e:
+        return JsonResponse({
+            'uploaded': False,
+            'error': {'message': str(e)}
+        }, status=400)
+
+
+@login_required
+def admin_trash(request):
+    """View trashed posts"""
+    if not request.user.is_staff:
+        return redirect('post_list')
+    
+    if not request.user.is_superuser:
+        return redirect('user_dashboard')
+    
+    # Get all trashed posts
+    posts = Post.objects.filter(is_trashed=True).select_related('author', 'category', 'trashed_by').order_by('-trashed_at')
+    
+    # Pagination
+    paginator = Paginator(posts, 15)
+    page_number = request.GET.get('page')
+    posts = paginator.get_page(page_number)
+    
+    context = {
+        'posts': posts,
+    }
+    return render(request, 'blog/admin_trash.html', context)
+
+
+@login_required
+def admin_move_to_trash(request, slug):
+    """Move post to trash"""
+    if not request.user.is_staff:
+        return redirect('post_list')
+    
+    post = get_object_or_404(Post, slug=slug)
+    
+    # Only superuser or post author can trash
+    if not request.user.is_superuser and post.author != request.user:
+        messages.error(request, 'You do not have permission to trash this post.')
+        return redirect('admin_dashboard')
+    
+    if request.method == 'POST':
+        from django.utils import timezone
+        post.is_trashed = True
+        post.trashed_at = timezone.now()
+        post.trashed_by = request.user
+        post.save()
+        messages.success(request, f'Post "{post.title}" moved to trash!')
+        return redirect('admin_dashboard')
+    
+    context = {
+        'post': post,
+    }
+    return render(request, 'blog/admin_confirm_trash.html', context)
+
+
+@login_required
+@require_POST
+def admin_restore_post(request, slug):
+    """Restore post from trash"""
+    if not request.user.is_staff:
+        return redirect('post_list')
+    
+    post = get_object_or_404(Post, slug=slug, is_trashed=True)
+    
+    # Only superuser or post author can restore
+    if not request.user.is_superuser and post.author != request.user:
+        messages.error(request, 'You do not have permission to restore this post.')
+        return redirect('admin_trash')
+    
+    post.is_trashed = False
+    post.trashed_at = None
+    post.trashed_by = None
+    post.save()
+    messages.success(request, f'Post "{post.title}" restored successfully!')
+    return redirect('admin_trash')
+
+
+@login_required
+@require_POST
+def admin_restore_multiple(request):
+    """Restore multiple posts from trash"""
+    if not request.user.is_staff or not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    post_ids = request.POST.getlist('post_ids[]')
+    restored_count = 0
+    
+    for post_id in post_ids:
+        try:
+            post = Post.objects.get(id=post_id, is_trashed=True)
+            post.is_trashed = False
+            post.trashed_at = None
+            post.trashed_by = None
+            post.save()
+            restored_count += 1
+        except Post.DoesNotExist:
+            continue
+    
+    messages.success(request, f'{restored_count} post(s) restored successfully!')
+    return JsonResponse({'success': True, 'count': restored_count})
+
+
+@login_required
+@require_POST
+def admin_delete_permanently(request, slug):
+    """Permanently delete post from trash"""
+    if not request.user.is_staff or not request.user.is_superuser:
+        messages.error(request, 'You do not have permission to perform this action.')
+        return redirect('admin_trash')
+    
+    post = get_object_or_404(Post, slug=slug, is_trashed=True)
+    post_title = post.title
+    post.delete()
+    messages.success(request, f'Post "{post_title}" permanently deleted!')
+    return redirect('admin_trash')
+
+
+@login_required
+@require_POST
+def admin_delete_multiple(request):
+    """Permanently delete multiple posts from trash"""
+    if not request.user.is_staff or not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    post_ids = request.POST.getlist('post_ids[]')
+    deleted_count = 0
+    
+    for post_id in post_ids:
+        try:
+            post = Post.objects.get(id=post_id, is_trashed=True)
+            post.delete()
+            deleted_count += 1
+        except Post.DoesNotExist:
+            continue
+    
+    messages.success(request, f'{deleted_count} post(s) permanently deleted!')
+    return JsonResponse({'success': True, 'count': deleted_count})
+
+
+@login_required
+@require_POST
+def admin_empty_trash(request):
+    """Empty all trash - permanently delete all trashed posts"""
+    if not request.user.is_staff or not request.user.is_superuser:
+        return JsonResponse({'success': False, 'error': 'Unauthorized'}, status=403)
+    
+    deleted_count = Post.objects.filter(is_trashed=True).count()
+    Post.objects.filter(is_trashed=True).delete()
+    messages.success(request, f'Trash emptied! {deleted_count} post(s) permanently deleted!')
+    return redirect('admin_trash')

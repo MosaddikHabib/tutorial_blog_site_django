@@ -11,18 +11,70 @@
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 	<!-- Custom CSS -->
 	<style>
-		body { background-color: #f8f9fa; }
-		.navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+		:root {
+			--bg-color: #f8f9fa;
+			--card-bg: #ffffff;
+			--text-color: #212529;
+			--border-color: #dee2e6;
+			--navbar-bg: #212529;
+			--sidebar-bg: #212529;
+			--primary-color: #0d6efd;
+			--muted-color: #adb5bd;
+		}
+		
+		[data-theme="dark"] {
+			--bg-color: #1a1a1a;
+			--card-bg: #2d2d2d;
+			--text-color: #f8f9fa;
+			--border-color: #495057;
+			--navbar-bg: #000000;
+			--sidebar-bg: #000000;
+			--primary-color: #60a5fa;
+			--muted-color: #cbd5e1;
+		}
+		
+		body { background-color: var(--bg-color); color: var(--text-color); transition: background-color 0.3s ease, color 0.3s ease; }
+		.navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; top: 0; left: 0; right: 0; z-index: 1030; background-color: var(--navbar-bg) !important; }
+		.card { background-color: var(--card-bg); border-color: var(--border-color); color: var(--text-color); }
+		.table { color: var(--text-color); }
+		.form-select, .form-control { background-color: var(--card-bg); color: var(--text-color); border-color: var(--border-color); }
 		.admin-card { transition: transform 0.2s; }
 		.admin-card:hover { transform: translateY(-5px); }
-		.stat-card { border-left: 4px solid #0d6efd; }
-		.sidebar { min-height: 100vh; background-color: #212529; }
-		.sidebar-link { color: #adb5bd; padding: 0.75rem 1rem; border-radius: 5px; display: block; text-decoration: none; }
-		.sidebar-link:hover { color: #fff; background-color: #343a40; }
-		.sidebar-link.active { color: #fff; background-color: #0d6efd; }
+		.stat-card { border-left: 4px solid var(--primary-color); }
+		.sidebar { 
+			position: fixed;
+			top: 56px;
+			left: 0;
+			width: 16.66667%; /* col-md-2 width */
+			height: calc(100vh - 56px);
+			overflow-y: auto;
+			background-color: var(--sidebar-bg);
+			z-index: 1020;
+		}
+		.main-content {
+			margin-left: 16.66667%; /* Match sidebar width */
+			margin-top: 56px; /* Navbar height */
+			padding: 20px;
+		}
+		.sidebar-link { color: var(--muted-color); padding: 0.75rem 1rem; border-radius: 5px; display: block; text-decoration: none; }
+		.sidebar-link:hover { color: #fff; background-color: var(--primary-color); }
+		.sidebar-link.active { color: #fff; background-color: var(--primary-color); }
+		main { margin-top: 56px; }
+		
+		@media (min-width: 768px) and (max-width: 991px) {
+			.sidebar {
+				width: 25%; /* col-md-3 width */
+			}
+			.main-content {
+				margin-left: 25%;
+			}
+		}
 		
 		/* Responsive Design */
 		@media (max-width: 767px) {
+			.main-content {
+				margin-left: 0 !important;
+			}
 			.sidebar {
 				min-height: auto;
 				position: fixed;
@@ -101,6 +153,41 @@
 		.mobile-menu-btn {
 			display: none;
 		}
+		
+		.theme-toggle {
+			position: relative;
+			width: 50px;
+			height: 26px;
+			background: rgba(255, 255, 255, 0.2);
+			border-radius: 13px;
+			cursor: pointer;
+			transition: all 0.3s ease;
+			border: 2px solid rgba(255, 255, 255, 0.3);
+			padding: 0;
+		}
+		
+		.theme-toggle:hover {
+			background: rgba(255, 255, 255, 0.3);
+		}
+		
+		.theme-toggle-slider {
+			position: absolute;
+			top: 2px;
+			left: 2px;
+			width: 18px;
+			height: 18px;
+			background: white;
+			border-radius: 50%;
+			transition: transform 0.3s ease;
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			font-size: 10px;
+		}
+		
+		[data-theme="dark"] .theme-toggle-slider {
+			transform: translateX(24px);
+		}
 	</style>
 </head>
 <body>
@@ -115,9 +202,14 @@
 					<i class="fas fa-tachometer-alt me-2"></i>Admin Dashboard
 				</a>
 			</div>
-			<div class="d-flex">
-				<span class="text-light me-3">Welcome, {{ user.username }}</span>
-				<a href="{% url 'post_list' %}" class="btn btn-outline-light btn-sm me-2" target="_blank">
+			<div class="d-flex align-items-center gap-2">
+				<span class="text-light me-2">Welcome, {{ user.username }}</span>
+				<button type="button" class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle theme">
+					<div class="theme-toggle-slider">
+						<i class="fas fa-sun" id="themeIcon" style="color: #f59e0b;"></i>
+					</div>
+				</button>
+				<a href="{% url 'post_list' %}" class="btn btn-outline-light btn-sm" target="_blank">
 					<i class="fas fa-globe me-1"></i>View Site
 				</a>
 				<a href="/admin/" class="btn btn-outline-light btn-sm" target="_blank">
@@ -162,6 +254,14 @@
 						</a>
 					</li>
 					<li class="nav-item mb-2">
+						<a class="nav-link sidebar-link" href="{% url 'admin_trash' %}">
+							<i class="fas fa-trash me-2"></i>Trash
+							{% if stats.trashed_posts > 0 %}
+							<span class="badge bg-danger ms-1">{{ stats.trashed_posts }}</span>
+							{% endif %}
+						</a>
+					</li>
+					<li class="nav-item mb-2">
 						<a class="nav-link sidebar-link" href="/admin/" target="_blank">
 							<i class="fas fa-cog me-2"></i>Django Admin
 						</a>
@@ -171,7 +271,7 @@
 			</nav>
 
 			<!-- Main Content -->
-			<main class="col-md-9 col-lg-10 px-md-4 py-4">
+			<main class="col-md-9 col-lg-10 px-md-4 py-4 main-content">
 				{% if messages %}
 					{% for message in messages %}
 						<div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
@@ -275,6 +375,7 @@
 								<table class="table table-hover">
 									<thead>
 										<tr>
+											<th>#</th>
 											<th>Title</th>
 											<th>Author</th>
 											<th>Category</th>
@@ -286,6 +387,7 @@
 									<tbody>
 										{% for post in posts %}
 										<tr>
+											<td>{{ posts.start_index|add:forloop.counter0 }}</td>
 											<td>{{ post.title }}</td>
 											<td>
 												<span class="badge bg-info">
@@ -302,27 +404,88 @@
 											</td>
 											<td>{{ post.created_at|date:"M d, Y" }}</td>
 											<td>
-												{% if post.slug %}
-												<a href="{% url 'admin_edit_post' post.slug %}" class="btn btn-sm btn-outline-primary">
-													<i class="fas fa-edit"></i>
-												</a>
-												<a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-sm btn-outline-info">
-													<i class="fas fa-eye"></i>
-												</a>
-												<a href="{% url 'admin_delete_post' post.slug %}" class="btn btn-sm btn-outline-danger">
-													<i class="fas fa-trash"></i>
-												</a>
-												{% else %}
-												<button class="btn btn-sm btn-outline-secondary" disabled title="No slug available">
-													<i class="fas fa-exclamation-triangle"></i>
-												</button>
-												{% endif %}
+												<div class="btn-group btn-group-sm" role="group">
+													{% if post.slug %}
+													<a href="{% url 'admin_edit_post' post.slug %}" class="btn btn-primary" title="Edit">
+														<i class="fas fa-edit"></i>
+													</a>
+													<a href="{% url 'post_detail' post.slug %}" target="_blank" class="btn btn-info" title="View">
+														<i class="fas fa-eye"></i>
+													</a>
+													<a href="{% url 'admin_delete_post' post.slug %}" class="btn btn-danger" title="Delete">
+														<i class="fas fa-trash"></i>
+													</a>
+													{% else %}
+													<button class="btn btn-secondary" disabled title="No slug available">
+														<i class="fas fa-exclamation-triangle"></i>
+													</button>
+													{% endif %}
+												</div>
 											</td>
 										</tr>
 										{% endfor %}
 									</tbody>
 								</table>
 							</div>
+							
+							<!-- Pagination -->
+							{% if posts.has_other_pages %}
+							<nav aria-label="Posts pagination" class="mt-4">
+								<ul class="pagination justify-content-center">
+									{% if posts.has_previous %}
+										<li class="page-item">
+											<a class="page-link" href="?page=1{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="First">
+												<span aria-hidden="true">&laquo;&laquo;</span>
+											</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="?page={{ posts.previous_page_number }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="Previous">
+												<span aria-hidden="true">&laquo;</span>
+											</a>
+										</li>
+									{% else %}
+										<li class="page-item disabled">
+											<span class="page-link">&laquo;&laquo;</span>
+										</li>
+										<li class="page-item disabled">
+											<span class="page-link">&laquo;</span>
+										</li>
+									{% endif %}
+									
+									{% for num in posts.paginator.page_range %}
+										{% if posts.number == num %}
+											<li class="page-item active"><span class="page-link">{{ num }}</span></li>
+										{% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+											<li class="page-item"><a class="page-link" href="?page={{ num }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}">{{ num }}</a></li>
+										{% endif %}
+									{% endfor %}
+									
+									{% if posts.has_next %}
+										<li class="page-item">
+											<a class="page-link" href="?page={{ posts.next_page_number }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="Next">
+												<span aria-hidden="true">&raquo;</span>
+											</a>
+										</li>
+										<li class="page-item">
+											<a class="page-link" href="?page={{ posts.paginator.num_pages }}{% if selected_user_id %}&user={{ selected_user_id }}{% endif %}" aria-label="Last">
+												<span aria-hidden="true">&raquo;&raquo;</span>
+											</a>
+										</li>
+									{% else %}
+										<li class="page-item disabled">
+											<span class="page-link">&raquo;</span>
+										</li>
+										<li class="page-item disabled">
+											<span class="page-link">&raquo;&raquo;</span>
+										</li>
+									{% endif %}
+								</ul>
+								<p class="text-center text-muted small">
+									Page {{ posts.number }} of {{ posts.paginator.num_pages }} | Total posts: {{ posts.paginator.count }}
+								</p>
+							</nav>
+							{% endif %}
+							
 						{% else %}
 							<p class="text-muted">No posts yet. <a href="{% url 'admin_create_post' %}">Create your first post!</a></p>
 						{% endif %}
@@ -395,5 +558,43 @@
 		// Load drafts when page loads
 		document.addEventListener('DOMContentLoaded', loadDrafts);
 	</script>
+	
+	<script>
+		// Theme Toggle Functionality
+		function toggleTheme() {
+			const html = document.documentElement;
+			const themeIcon = document.getElementById('themeIcon');
+			const currentTheme = html.getAttribute('data-theme');
+			
+			if (currentTheme === 'dark') {
+				html.removeAttribute('data-theme');
+				localStorage.setItem('theme', 'light');
+				themeIcon.className = 'fas fa-sun';
+				themeIcon.style.color = '#f59e0b';
+			} else {
+				html.setAttribute('data-theme', 'dark');
+				localStorage.setItem('theme', 'dark');
+				themeIcon.className = 'fas fa-moon';
+				themeIcon.style.color = '#60a5fa';
+			}
+		}
+
+		// Load saved theme on page load
+		document.addEventListener('DOMContentLoaded', function() {
+			const savedTheme = localStorage.getItem('theme');
+			const html = document.documentElement;
+			const themeIcon = document.getElementById('themeIcon');
+			
+			if (savedTheme === 'dark') {
+				html.setAttribute('data-theme', 'dark');
+				themeIcon.className = 'fas fa-moon';
+				themeIcon.style.color = '#60a5fa';
+			} else {
+				themeIcon.className = 'fas fa-sun';
+				themeIcon.style.color = '#f59e0b';
+			}
+		});
+	</script>
 </body>
 </html>
+

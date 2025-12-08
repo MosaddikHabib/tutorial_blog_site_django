@@ -481,13 +481,12 @@
             ImageStyle,
             ImageToolbar,
             ImageUpload,
+            SimpleUploadAdapter,
             Alignment,
             BlockQuote,
             CodeBlock,
             Underline,
             Strikethrough,
-            CKFinderUploadAdapter,
-            CKFinder,
             MediaEmbed,
             SourceEditing,
             RemoveFormat
@@ -509,6 +508,7 @@
                     ImageStyle,
                     ImageToolbar,
                     ImageUpload,
+                    SimpleUploadAdapter,
                     Table,
                     TableToolbar,
                     TableProperties,
@@ -571,7 +571,13 @@
                         'alignLeft',
                         'alignRight'
                     ],
-                    toolbar: ['imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', '|', 'imageTextAlternative']
+                    toolbar: ['imageStyle:alignLeft', 'imageStyle:alignCenter', 'imageStyle:alignRight', '|', 'imageTextAlternative'],
+                    upload: {
+                        types: ['jpeg', 'png', 'gif', 'bmp', 'webp', 'tiff']
+                    }
+                },
+                simpleUpload: {
+                    uploadUrl: '{% url "ckeditor_upload_image" %}'
                 }
             })
             .then(newEditor => {
@@ -661,21 +667,9 @@
         // Add event listeners for auto-save
         document.getElementById('title').addEventListener('input', scheduleAutoSave);
         document.getElementById('category').addEventListener('change', scheduleAutoSave);
-        quill.on('text-change', scheduleAutoSave);
-
-        // Before form submission, copy Quill content to hidden textarea
-        document.getElementById('postForm').addEventListener('submit', function() {
-            document.getElementById('content').value = quill.root.innerHTML;
-        });
-
-        // Auto-save when user leaves the page
-        window.addEventListener('beforeunload', function(e) {
-            const title = document.getElementById('title').value.trim();
-            const content = quill.root.innerHTML.trim();
-            if (title || content) {
-                autoSaveDraft();
-            }
-        });
+        if (editor) {
+            editor.model.document.on('change:data', scheduleAutoSave);
+        }
 
         // Theme Toggle Functionality
         function toggleTheme() {

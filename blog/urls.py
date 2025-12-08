@@ -33,4 +33,16 @@ urlpatterns = [
     # Auto-save draft functionality
     path('api/auto-save-draft/', views.auto_save_draft, name='auto_save_draft'),
     path('api/get-drafts/', views.get_draft_posts, name='get_draft_posts'),
+    
+    # CKEditor image upload
+    path('api/ckeditor-upload/', views.ckeditor_upload_image, name='ckeditor_upload_image'),
+    
+    # Trash Management URLs
+    path('manage/trash/', views.admin_trash, name='admin_trash'),
+    path('manage/trash/view/<slug:slug>/', views.admin_view_trashed_post, name='admin_view_trashed_post'),
+    path('manage/trash/restore/<slug:slug>/', views.admin_restore_post, name='admin_restore_post'),
+    path('manage/trash/restore-multiple/', views.admin_restore_multiple, name='admin_restore_multiple'),
+    path('manage/trash/delete/<slug:slug>/', views.admin_delete_permanently, name='admin_delete_permanently'),
+    path('manage/trash/delete-multiple/', views.admin_delete_multiple, name='admin_delete_multiple'),
+    path('manage/trash/empty/', views.admin_empty_trash, name='admin_empty_trash'),
 ]
