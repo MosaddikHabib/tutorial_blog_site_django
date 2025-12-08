@@ -18,20 +18,31 @@ def post_list(request):
     homepage_content = HomePageContent.get_content()
     categories = Category.objects.all()
     
+    # Get status filter from request (default to 'published')
+    status_filter = request.GET.get('status', 'published')
+    
     # Search functionality
     search_query = request.GET.get('search', '')
+    
+    # Build base queryset
+    if status_filter == 'draft':
+        base_posts = Post.objects.filter(status='draft', is_trashed=False)
+    elif status_filter == 'all':
+        base_posts = Post.objects.filter(is_trashed=False)
+    else:  # 'published' (default)
+        base_posts = Post.objects.filter(status='published', is_trashed=False)
+    
+    # Apply search filter if present
     if search_query:
-        posts = Post.objects.filter(
+        posts = base_posts.filter(
             Q(title__icontains=search_query) | 
             Q(content__icontains=search_query) | 
-            Q(excerpt__icontains=search_query),
-            status='published',
-            is_trashed=False
+            Q(excerpt__icontains=search_query)
         ).select_related('author', 'category')
     else:
-        posts = Post.objects.filter(status='published', is_trashed=False).select_related('author', 'category')
+        posts = base_posts.select_related('author', 'category')
     
-    # Get recent posts for summary cards
+    # Get recent posts for summary cards (only published)
     recent_posts = Post.objects.filter(status='published', is_trashed=False).select_related('author', 'category')[:6]
     
     # Pagination
@@ -45,6 +56,7 @@ def post_list(request):
         'recent_posts': recent_posts,
         'categories': categories,
         'search_query': search_query,
+        'status_filter': status_filter,
     }
     return render(request, 'blog/post_list.html', context)
 

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-your-secret-key-here-change-in-production'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -186,3 +186,12 @@ CKEDITOR_CONFIGS = {
 # File Upload Settings - Increase limits for larger images/videos
 DATA_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
 FILE_UPLOAD_MAX_MEMORY_SIZE = 52428800  # 50 MB in bytes
+
+# Error Pages
+if DEBUG:
+    # In development, Django shows detailed error pages
+    pass
+else:
+    # In production, use custom error templates
+    # Make sure these templates exist in templates/ directory
+    pass

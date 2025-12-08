@@ -1,0 +1,38 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Access Forbidden - 403{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="text-center">
+        <div style="font-size: 150px; font-weight: bold; color: #e5e7eb; margin-bottom: 20px;">
+            403
+        </div>
+        
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-ban" style="color: #f97316;"></i> Access Forbidden
+        </h1>
+        
+        <p class="lead text-muted mb-4">
+            You don't have permission to access this resource.
+        </p>
+        
+        <div class="mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/1995/1995467.png" alt="403 Error" style="max-width: 300px; opacity: 0.7;">
+        </div>
+        
+        <div class="alert alert-danger" role="alert">
+            <i class="fas fa-lock me-2"></i>This area is restricted. If you believe this is a mistake, please contact us.
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="{% url 'post_list' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>Go to Home
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

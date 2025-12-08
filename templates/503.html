@@ -1,0 +1,43 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Service Unavailable - 503{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="text-center">
+        <div style="font-size: 150px; font-weight: bold; color: #e5e7eb; margin-bottom: 20px;">
+            503
+        </div>
+        
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-wrench" style="color: #f59e0b;"></i> Service Unavailable
+        </h1>
+        
+        <p class="lead text-muted mb-4">
+            We're currently performing maintenance. Please check back soon!
+        </p>
+        
+        <div class="mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/2748/2748558.png" alt="503 Error" style="max-width: 300px; opacity: 0.7;">
+        </div>
+        
+        <div class="alert alert-info" role="alert">
+            <i class="fas fa-clock me-2"></i>Expected to be back online shortly. We appreciate your patience!
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="javascript:location.reload()" class="btn btn-primary btn-lg">
+                <i class="fas fa-sync me-2"></i>Refresh Page
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </a>
+        </div>
+        
+        <div class="mt-5 p-4" style="background: #f3f4f6; border-radius: 10px;">
+            <h5 class="mb-3">Estimated Time</h5>
+            <p class="text-muted">We're working hard to get back online. Thank you for your understanding!</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

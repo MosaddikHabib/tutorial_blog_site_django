@@ -1,0 +1,47 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Server Error - 500{% endblock %}
+
+{% block content %}
+<div class="container d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+    <div class="text-center">
+        <div style="font-size: 150px; font-weight: bold; color: #e5e7eb; margin-bottom: 20px;">
+            500
+        </div>
+        
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-bomb" style="color: #dc2626;"></i> Server Error
+        </h1>
+        
+        <p class="lead text-muted mb-4">
+            Something went wrong on our end. Our team has been notified and is working to fix it.
+        </p>
+        
+        <div class="mb-4">
+            <img src="https://cdn-icons-png.flaticon.com/512/4436/4436481.png" alt="500 Error" style="max-width: 300px; opacity: 0.7;">
+        </div>
+        
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-info-circle me-2"></i>Please try again in a few moments or contact us if the problem persists.
+        </div>
+        
+        <div class="btn-group" role="group">
+            <a href="{% url 'post_list' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-home me-2"></i>Go to Home
+            </a>
+            <a href="javascript:history.back()" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-arrow-left me-2"></i>Go Back
+            </a>
+        </div>
+        
+        <div class="mt-5 p-4" style="background: #f3f4f6; border-radius: 10px;">
+            <h5 class="mb-3">What You Can Do</h5>
+            <ul class="list-unstyled">
+                <li class="mb-2"><i class="fas fa-check me-2" style="color: #10b981;"></i>Refresh the page</li>
+                <li class="mb-2"><i class="fas fa-check me-2" style="color: #10b981;"></i>Clear your browser cache</li>
+                <li class="mb-2"><i class="fas fa-check me-2" style="color: #10b981;"></i>Try again in a few minutes</li>
+            </ul>
+        </div>
+    </div>
+</div>
+{% endblock %}
